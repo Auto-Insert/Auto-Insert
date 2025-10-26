@@ -1,0 +1,49 @@
+@startuml SystemArchitecture
+
+title Auto-Insert System Architecture Diagram
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+left to right direction
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+skinparam rectangle {
+    BackgroundColor LightBlue
+    BorderColor Black
+}
+
+skinparam component {
+    BackgroundColor WhiteSmoke
+    BorderColor DarkGray
+    FontStyle bold
+}
+
+package #White {
+    rectangle "User Interface" #LightBlue {
+        component View #AliceBlue
+        component ViewModels #AliceBlue
+        
+        View --> ViewModels
+    }
+
+    rectangle "System Backend" #LightGreen {
+        component Controllers #Honeydew
+        component Services #Honeydew
+        component "Hardware Drivers" as Drivers #Honeydew
+        component Storage #Honeydew
+        
+        ViewModels <--> Controllers
+        Controllers --> Services
+        Services <--> Drivers
+        Services <--> Storage
+    }
+
+    rectangle "STM32 MicroController" #LightCoral {
+        component "Low-Level Hardware Drivers" as SubSystems #MistyRose
+        
+        Drivers <--> SubSystems : SPI Communication
+    }
+}
+
+@enduml
