@@ -1,23 +1,31 @@
-using AutoInsert.Core.Services;
+using AutoInsert.Shared.Models;
+using AutoInsert.Core.Controllers;
+using System.Globalization;
 
-namespace AutoInsert.Core;
-
+namespace AutoInsert.Core;  
 internal class Program
 {
-    static void Main(string[] args)
+    async static Task Main(string[] args)
     {
-        if (args.Length == 0)
-        {
-            Console.WriteLine("Please provide the file path as an argument.");
-            return;
-        }
+        UR ur = new UR("192.168.1.1");
+        URController urController = new(ur);
 
-        // Read plugs from filePath provided as the first argument
-        var plugs = ThreadHoleReadingService.ReadThreadHolesFromFile(args[0]);
+        // Connect to robot
+        await urController.ConnectAsync();
+        
+        string robotmode = await urController.GetRobotModeAsync();
+        Console.WriteLine($"Robot Mode: {robotmode}\n");
 
-        foreach (var plug in plugs)
+        // Get current joint positions
+        Waypoint? waypoint = await urController.GetCurrentPositionAsync();
+        if (waypoint != null)
         {
-            Console.WriteLine($"Type: {plug.PlugType}, Position: ({plug.PositionX}, {plug.PositionY}, {plug.PositionZ}), Vector: ({plug.VectorX}, {plug.VectorY}, {plug.VectorZ})");
+            Console.WriteLine("Current Joint Positions:");
+            for (int i = 0; i < waypoint.JointPositions.Length; i++)
+            {
+                Console.WriteLine($"  Joint {i + 1}: {waypoint.JointPositions[i].ToString("F4", CultureInfo.InvariantCulture)} rad");
+            }
         }
+    
     }
 }
