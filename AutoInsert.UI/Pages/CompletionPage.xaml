@@ -1,0 +1,74 @@
+﻿<Page x:Class="AutoInsert.UI.Pages.CompletionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="clr-namespace:AutoInsert.UI"
+      Title="Program Configuration">
+    <Grid x:Name="MainGrid" Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Vertical separator line -->
+        <Rectangle Grid.Column="0" 
+                   HorizontalAlignment="Right" 
+                   Width="2" 
+                   Fill="LightGray" 
+                   Margin="10,0" />
+
+        <StackPanel Grid.Column="0">
+            <Label FontSize="32" HorizontalAlignment="Center">Remaining Materials</Label>
+            
+            <Grid x:Name="Formular" HorizontalAlignment="Center" local:GridHelper.ColumnSpacing="30">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <Label Grid.Row="0" Grid.Column="0" FontSize="18">Plug Type 1:</Label>
+                <Label Grid.Row="1" Grid.Column="0" FontSize="18">Plug Type 2:</Label>
+                </Grid>
+        </StackPanel>
+        
+        <StackPanel Grid.Column="1" local:GridHelper.ColumnSpacing="30">
+            <Label FontSize="32" HorizontalAlignment="Center">Progress</Label>
+            <Grid x:Name="MaterialsGrid" HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+            
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+            
+                <Label Grid.Row="0" Grid.Column="0" FontSize="18">Plug Type 1:</Label>
+                <Label Grid.Row="1" Grid.Column="0" FontSize="18">Plug Type 2:</Label>
+                <Label Grid.Row="2" Grid.Column="0" FontSize="18">Loctite:</Label>
+            </Grid>
+        </StackPanel>
+        <StackPanel Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom">
+            <Button Width="120"
+                    Height="30"
+                    Margin="0,0,0,5"
+                    Click="RestartProcess">
+                Restart Process
+            </Button>
+
+            <Button Width="120"
+                    Height="30"
+                    Click="StopApplication">
+                Stop Application
+            </Button>
+        </StackPanel>
+    </Grid>
+</Page>
