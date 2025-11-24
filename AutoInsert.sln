@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoInsert.Core.Tests", "Au
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AutoInsert.UI", "AutoInsert.UI", "{6F473BC9-EB16-2122-5CBE-57151DCFF0D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auto-Insert-UI", "AutoInsert.UI\Auto-Insert-UI.csproj", "{AEF6EC61-BC17-4C4E-B632-ACF37407F6DA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

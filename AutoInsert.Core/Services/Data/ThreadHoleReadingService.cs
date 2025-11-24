@@ -10,7 +10,7 @@ namespace AutoInsert.Core.Services
         public static async Task<List<ThreadHole>> ReadThreadHolesFromFile(string filePath, string separator = ";")
         {
             var threadHoles = new List<ThreadHole>();
-            var lines = File.ReadAllLines(filePath);
+            var lines = await File.ReadAllLinesAsync(filePath);
             foreach (var line in lines)
             {
                 var parts = line.Split(separator);
