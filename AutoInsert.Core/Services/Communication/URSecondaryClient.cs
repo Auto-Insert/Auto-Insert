@@ -6,7 +6,7 @@ using AutoInsert.Core.Utilities;
 namespace AutoInsert.Core.Services.Communication;
 
 // The secondary interface on the UR robot is for receiving data packages about the state of the robot.
-public class URSecondaryClient(string ipAddress, int port = 30002)
+public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
 {
     private Socket? _socket;
     private readonly string _ipAddress = ipAddress;
