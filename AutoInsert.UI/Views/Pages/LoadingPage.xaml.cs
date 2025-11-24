@@ -6,7 +6,7 @@ namespace AutoInsert.UI.Pages;
 public partial class LoadingPage : Page
 {
     private readonly ProgramConfiguration _config;
-    private ProcessResult _result;
+    private ProcessResult? _result;
 
     public LoadingPage(ProgramConfiguration config)
     {

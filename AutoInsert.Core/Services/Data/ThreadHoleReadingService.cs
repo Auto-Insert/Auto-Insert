@@ -7,7 +7,7 @@ namespace AutoInsert.Core.Services
     public class ThreadHoleReadingService
     {
         private static readonly CultureInfo Culture = new("da-DK"); // Danish culture uses comma as decimal separator
-        public static List<ThreadHole> ReadThreadHolesFromFile(string filePath, string separator = ";")
+        public static async Task<List<ThreadHole>> ReadThreadHolesFromFile(string filePath, string separator = ";")
         {
             var threadHoles = new List<ThreadHole>();
             var lines = File.ReadAllLines(filePath);

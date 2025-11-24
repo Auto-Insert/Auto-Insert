@@ -28,4 +28,9 @@
       </Page>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\AutoInsert.Core\AutoInsert.Core.csproj" />
+      <ProjectReference Include="..\AutoInsert.Shared\AutoInsert.Shared.csproj" />
+    </ItemGroup>
+
 </Project>
