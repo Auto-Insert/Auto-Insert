@@ -1,4 +1,5 @@
-﻿using AutoInsert.Core.Services;
+﻿using System.Threading.Tasks;
+using AutoInsert.Core.Services;
 using AutoInsert.Shared.Models;
 
 namespace AutoInsert.Core.Tests.Services
@@ -6,7 +7,7 @@ namespace AutoInsert.Core.Tests.Services
     public class ThreadHoleReadingServiceTests
     {
         [Fact]
-        public void ReadThreadHolesFromFile_ValidFile_ReturnsThreadHoles()
+        public async Task ReadThreadHolesFromFile_ValidFile_ReturnsThreadHoles()
         {
             // Arrange
             var testFilePath = Path.Combine(Path.GetTempPath(), "test_plugs.txt");
@@ -14,7 +15,7 @@ namespace AutoInsert.Core.Tests.Services
             File.WriteAllText(testFilePath, testData);
 
             // Act
-            var result = ThreadHoleReadingService.ReadThreadHolesFromFile(testFilePath);
+            var result = await ThreadHoleReadingService.ReadThreadHolesFromFile(testFilePath);
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -28,14 +29,14 @@ namespace AutoInsert.Core.Tests.Services
         }
 
         [Fact]
-        public void ReadThreadHolesFromFile_EmptyFile_ReturnsEmptyList()
+        public async Task ReadThreadHolesFromFile_EmptyFile_ReturnsEmptyList()
         {
             // Arrange
             var testFilePath = Path.Combine(Path.GetTempPath(), "empty_plugs.txt");
             File.WriteAllText(testFilePath, string.Empty);
 
             // Act
-            var result = ThreadHoleReadingService.ReadThreadHolesFromFile(testFilePath);
+            var result = await ThreadHoleReadingService.ReadThreadHolesFromFile(testFilePath);
 
             // Assert
             Assert.Empty(result);
@@ -45,7 +46,7 @@ namespace AutoInsert.Core.Tests.Services
         }
 
         [Fact]
-        public void ReadThreadHolesFromFile_InvalidLine_SkipsInvalidLine()
+        public async Task ReadThreadHolesFromFile_InvalidLine_SkipsInvalidLine()
         {
             // Arrange
             var testFilePath = Path.Combine(Path.GetTempPath(), "invalid_plugs.txt");
@@ -53,7 +54,7 @@ namespace AutoInsert.Core.Tests.Services
             File.WriteAllText(testFilePath, testData);
 
             // Act
-            var result = ThreadHoleReadingService.ReadThreadHolesFromFile(testFilePath);
+            var result = await ThreadHoleReadingService.ReadThreadHolesFromFile(testFilePath);
 
             // Assert
             Assert.Equal(2, result.Count);
