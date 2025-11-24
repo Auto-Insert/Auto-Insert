@@ -17,8 +17,22 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        
+        // Subscribe to global keyboard events
+        this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+        
         // Start with configuration page
         MainFrame.Navigate(new ConfigurationPage());
+    }
+
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // Press F12 to open debug page
+        if (e.Key == Key.F12)
+        {
+            MainFrame.Navigate(new DebugPage());
+            e.Handled = true;
+        }
     }
 
     private void MainFrame_Navigated(object sender, NavigationEventArgs e)

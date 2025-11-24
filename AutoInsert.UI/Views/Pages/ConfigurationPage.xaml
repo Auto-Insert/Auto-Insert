@@ -200,26 +200,11 @@
                             <Label Grid.Row="0" Grid.Column="0" 
                                    FontSize="16"
                                    VerticalAlignment="Center"
-                                   Margin="0,0,15,10">Loctite:</Label>
+                                   Margin="0,0,15,0">Estimated Time:</Label>
                             <TextBlock Grid.Row="0" Grid.Column="1" 
                                        FontSize="16" 
-                                       VerticalAlignment="Center" 
-                                       Text="Required"
-                                       Margin="0,0,0,10"/>
-                            
-                            <Label Grid.Row="1" Grid.Column="0" 
-                                   FontSize="16"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,15,0">Estimated Time:</Label>
-                            <TextBlock Grid.Row="1" Grid.Column="1" 
-                                       FontSize="16" 
-                                       VerticalAlignment="Center">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}{0} minutes">
-                                        <Binding Path="HoleCount"/>
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
+                                       VerticalAlignment="Center"
+                                       Text="{Binding EstimatedTime}"/>
                         </Grid>
                     </StackPanel>
                 </Border>

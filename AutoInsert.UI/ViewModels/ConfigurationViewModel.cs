@@ -7,7 +7,7 @@ namespace AutoInsert.UI.ViewModels;
 
 public class ConfigurationViewModel() : INotifyPropertyChanged
 {
-    public int[] AvailableBlockCounts { get; } = { 1, 2, 3, 4, 5, 6 };
+    public int[] AvailableBlockCounts { get; } = { 1, 2, 3, 4 };
     private string? _errorMessage = null;
     public string? ErrorMessage
     {
@@ -26,6 +26,8 @@ public class ConfigurationViewModel() : INotifyPropertyChanged
         {
             _blockCount = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(RequiredPlugs));
+            OnPropertyChanged(nameof(EstimatedTime));
         }
     }
     private bool _programLoaded = false;
@@ -58,6 +60,7 @@ public class ConfigurationViewModel() : INotifyPropertyChanged
             OnPropertyChanged();
             OnPropertyChanged(nameof(RequiredPlugs)); 
             OnPropertyChanged(nameof(HoleCount));
+            OnPropertyChanged(nameof(EstimatedTime));
         }
     }
     // Computed properties from the loaded program
@@ -71,9 +74,25 @@ public class ConfigurationViewModel() : INotifyPropertyChanged
 
             return Program
                 .GroupBy(hole => hole.PlugType)
-                .ToDictionary(group => group.Key, group => group.Count());
+                .ToDictionary(group => group.Key, group => group.Count() * _blockCount);
         }
     }
+    
+    public string EstimatedTime
+    {
+        get
+        {
+            if (Program == null || Program.Count == 0)
+                return "N/A";
+
+            double timePerHoleSeconds = 30.0; // Example fixed time per hole
+            double totalSeconds = Program.Count * timePerHoleSeconds * _blockCount;
+
+            TimeSpan timeSpan = TimeSpan.FromSeconds(totalSeconds);
+            return string.Format("{0:D2}m:{1:D2}s", (int)timeSpan.TotalMinutes, timeSpan.Seconds);
+        }
+    }
+    
     // Visual representation methods
     public void LoadProgram(string fileName, List<ThreadHole> threadHoles)
     {
