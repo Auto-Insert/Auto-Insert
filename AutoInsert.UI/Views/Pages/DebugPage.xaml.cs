@@ -41,4 +41,46 @@ public partial class DebugPage : Page
             e.Handled = true;
         }
     }
+
+    private async void ReconnectButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.ReconnectAsync();
+    }
+
+    private async void EnableFreedriveButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.EnableFreedriveAsync();
+    }
+
+    private async void DisableFreedriveButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.DisableFreedriveAsync();
+    }
+
+    private async void SendScriptButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.SendCustomScriptAsync();
+    }
+
+    private void SaveWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        viewModel.SaveCurrentWaypoint();
+    }
+
+    private void DeleteWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        viewModel.DeleteSelectedWaypoint();
+    }
+
+    private async void MoveToWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.MoveToSelectedWaypointAsync();
+    }
 }

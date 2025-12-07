@@ -53,6 +53,19 @@ end
         return await _secondaryClient.GetToolDataAsync();
     }
 
+    // Move commands
+    public async Task MoveToPositionAsync(Waypoint waypoint, double speed, double acceleration)
+    {
+        var positions = string.Join(", ", waypoint.JointPositions.Select(p => p.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)));
+        
+        string moveScript = $@"
+    def move_to_position():
+        movej([{positions}], a={acceleration.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}, v={speed.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)})
+    end
+    ";
+        await _primaryClient.SendURScriptAsync(moveScript);
+    }
+
     // URScript 
     public async Task<bool> SendURScriptAsync(string script) => 
         await _primaryClient.SendURScriptAsync(script);

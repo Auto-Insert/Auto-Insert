@@ -1,6 +1,5 @@
 using AutoInsert.Shared.Models;
 using AutoInsert.Core.Controllers;
-using System.Globalization;
 
 namespace AutoInsert.Core;  
 internal class Program
@@ -13,19 +12,7 @@ internal class Program
         // Connect to robot
         await urController.ConnectAsync();
         
-        string robotmode = await urController.GetRobotModeAsync();
-        Console.WriteLine($"Robot Mode: {robotmode}\n");
-
-        // Get current joint positions
-        Waypoint? waypoint = await urController.GetCurrentPositionAsync();
-        if (waypoint != null)
-        {
-            Console.WriteLine("Current Joint Positions:");
-            for (int i = 0; i < waypoint.JointPositions.Length; i++)
-            {
-                Console.WriteLine($"  Joint {i + 1}: {waypoint.JointPositions[i].ToString("F4", CultureInfo.InvariantCulture)} rad");
-            }
-        }
+        await urController.EnableFreedriveAsync();
     
     }
 }

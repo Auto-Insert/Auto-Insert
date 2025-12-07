@@ -8,9 +8,21 @@ namespace AutoInsert.UI.ViewModels;
 
 public class DebugViewModel : INotifyPropertyChanged
 {
-    private readonly DebugService debugService = new();
+    private URService urService;
     private CancellationTokenSource? _cancellationTokenSource;
     private CancellationTokenSource? _toolDataCancellationTokenSource;
+    
+    private string _ipAddress = "192.168.1.1";
+    public string IpAddress
+    {
+        get => _ipAddress;
+        set
+        {
+            _ipAddress = value;
+            OnPropertyChanged();
+        }
+    }
+
     private string? _robotMode = null;
     public string? RobotMode
     {
@@ -21,6 +33,7 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+    
     private Waypoint? _currentPosition;
     public Waypoint? CurrentPosition
     {
@@ -31,6 +44,7 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+    
     private ToolData? _currentToolData;
     public ToolData? CurrentToolData
     {
@@ -41,16 +55,79 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+
+    private string _customScript = "";
+    public string CustomScript
+    {
+        get => _customScript;
+        set
+        {
+            _customScript = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _scriptStatus = "";
+    public string ScriptStatus
+    {
+        get => _scriptStatus;
+        set
+        {
+            _scriptStatus = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private double _moveSpeed = 0.25;
+    public double MoveSpeed
+    {
+        get => _moveSpeed;
+        set
+        {
+            _moveSpeed = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private double _moveAcceleration = 1.2;
+    public double MoveAcceleration
+    {
+        get => _moveAcceleration;
+        set
+        {
+            _moveAcceleration = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private Waypoint? _selectedWaypoint;
+    public Waypoint? SelectedWaypoint
+    {
+        get => _selectedWaypoint;
+        set
+        {
+            _selectedWaypoint = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public ObservableCollection<Waypoint> SavedWaypoints { get; } = new();
+
+    public DebugViewModel()
+    {
+        var ur = new UR(IpAddress);
+        urService = new URService(ur);
+    }
     
     public async Task InitializeAsync()
     {
         try
         {
-            bool connected = await debugService.ConnectAsync();
+            bool connected = await urService.ConnectAsync();
             
             if (connected)
             {
-                RobotMode = await debugService.GetRobotModeAsync();
+                RobotMode = await urService.GetRobotModeAsync();
                 
                 StartPositionPolling();
                 StartToolDataPolling();
@@ -63,6 +140,152 @@ public class DebugViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             RobotMode = $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task ReconnectAsync()
+    {
+        try
+        {
+            // Stop polling
+            StopAllPolling();
+
+            // Create new service with updated IP
+            var ur = new UR(IpAddress);
+            urService = new URService(ur);
+
+            // Connect
+            ScriptStatus = "Connecting...";
+            bool connected = await urService.ConnectAsync();
+            
+            if (connected)
+            {
+                RobotMode = await urService.GetRobotModeAsync();
+                ScriptStatus = "Connected successfully";
+                
+                StartPositionPolling();
+                StartToolDataPolling();
+            }
+            else
+            {
+                RobotMode = "Not Connected";
+                ScriptStatus = "Connection failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            RobotMode = $"Error: {ex.Message}";
+            ScriptStatus = $"Connection error: {ex.Message}";
+        }
+    }
+
+    public async Task EnableFreedriveAsync()
+    {
+        try
+        {
+            await urService.EnableFreedriveAsync();
+            ScriptStatus = "Freedrive enabled";
+        }
+        catch (Exception ex)
+        {
+            ScriptStatus = $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task DisableFreedriveAsync()
+    {
+        try
+        {
+            await urService.DisableFreedriveAsync();
+            ScriptStatus = "Freedrive disabled";
+        }
+        catch (Exception ex)
+        {
+            ScriptStatus = $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task SendCustomScriptAsync()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(CustomScript))
+            {
+                ScriptStatus = "Please enter a script";
+                return;
+            }
+
+            bool success = await urService.SendURScriptAsync(CustomScript);
+            ScriptStatus = success ? "Script sent successfully" : "Failed to send script";
+        }
+        catch (Exception ex)
+        {
+            ScriptStatus = $"Error: {ex.Message}";
+        }
+    }
+
+    public void SaveCurrentWaypoint()
+    {
+        try
+        {
+            if (CurrentPosition == null)
+            {
+                ScriptStatus = "No current position available";
+                return;
+            }
+
+            // Create a copy of the current position
+            var waypoint = new Waypoint
+            {
+                JointPositions = CurrentPosition.JointPositions.ToArray()
+            };
+
+            SavedWaypoints.Add(waypoint);
+            ScriptStatus = $"Waypoint saved (Total: {SavedWaypoints.Count})";
+        }
+        catch (Exception ex)
+        {
+            ScriptStatus = $"Error saving waypoint: {ex.Message}";
+        }
+    }
+
+    public void DeleteSelectedWaypoint()
+    {
+        try
+        {
+            if (SelectedWaypoint == null)
+            {
+                ScriptStatus = "No waypoint selected";
+                return;
+            }
+
+            SavedWaypoints.Remove(SelectedWaypoint);
+            SelectedWaypoint = null;
+            ScriptStatus = $"Waypoint deleted (Total: {SavedWaypoints.Count})";
+        }
+        catch (Exception ex)
+        {
+            ScriptStatus = $"Error deleting waypoint: {ex.Message}";
+        }
+    }
+
+    public async Task MoveToSelectedWaypointAsync()
+    {
+        try
+        {
+            if (SelectedWaypoint == null)
+            {
+                ScriptStatus = "No waypoint selected";
+                return;
+            }
+
+            ScriptStatus = $"Moving to waypoint (v={MoveSpeed}, a={MoveAcceleration})...";
+            await urService.MoveToPositionAsync(SelectedWaypoint, MoveSpeed, MoveAcceleration);
+            ScriptStatus = "Move command sent";
+        }
+        catch (Exception ex)
+        {
+            ScriptStatus = $"Error moving to waypoint: {ex.Message}";
         }
     }
 
@@ -79,7 +302,7 @@ public class DebugViewModel : INotifyPropertyChanged
             {
                 try
                 {
-                    var position = await debugService.GetCurrentPositionAsync();
+                    var position = await urService.GetCurrentPositionAsync();
                     
                     // Update on UI thread
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -116,7 +339,7 @@ public class DebugViewModel : INotifyPropertyChanged
             {
                 try
                 {
-                    var toolData = await debugService.GetToolDataAsync();
+                    var toolData = await urService.GetToolDataAsync();
                     
                     // Update on UI thread
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>

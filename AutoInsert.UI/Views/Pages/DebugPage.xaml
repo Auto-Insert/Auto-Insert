@@ -31,22 +31,182 @@
 
         <!-- Main Content -->
         <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <!-- Connection Section -->
                 <GroupBox Header="Connection" Margin="0,0,0,15">
                     <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                            <TextBlock Text="IP Address: " 
+                                    FontWeight="Bold" 
+                                    FontSize="14"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,10,0"/>
+                            <TextBox Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"
+                                    Width="150"
+                                    FontFamily="Consolas"
+                                    FontSize="14"
+                                    Padding="5,2"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,10,0"/>
+                            <Button Content="Reconnect" 
+                                    Click="ReconnectButton_Click"
+                                    Width="100" 
+                                    Height="30"
+                                    FontSize="14"/>
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="Robot Mode: " 
-                                      FontWeight="Bold" 
-                                      FontSize="16"/>
+                                    FontWeight="Bold" 
+                                    FontSize="16"/>
                             <TextBlock Text="{Binding RobotMode}" 
-                                      FontSize="16"
-                                      Foreground="Blue"/>
+                                    FontSize="16"
+                                    Foreground="Blue"/>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
 
-                <Grid Grid.Row="1">
+                <!-- Control Section -->
+                <GroupBox Header="Robot Control" Margin="0,0,0,15">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,10">
+                            <Button Content="Enable Freedrive" 
+                                    Click="EnableFreedriveButton_Click"
+                                    Width="150" 
+                                    Height="35"
+                                    Margin="0,0,10,0"
+                                    FontSize="14"/>
+                            <Button Content="Disable Freedrive" 
+                                    Click="DisableFreedriveButton_Click"
+                                    Width="150" 
+                                    Height="35"
+                                    FontSize="14"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Waypoint Section -->
+                <GroupBox Header="Waypoint Testing" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="200"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Save Waypoint Row -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,10,0,10">
+                            <Button Content="Save Current Position" 
+                                    Click="SaveWaypointButton_Click"
+                                    Width="180" 
+                                    Height="30"
+                                    FontSize="14"/>
+                        </StackPanel>
+
+                        <!-- Speed and Acceleration Controls -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Speed:" 
+                                      FontWeight="Bold" 
+                                      FontSize="14"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,10,0"/>
+                            <TextBox Text="{Binding MoveSpeed, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="80"
+                                     FontFamily="Consolas"
+                                     FontSize="14"
+                                     Padding="5,2"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,20,0"/>
+                            <TextBlock Text="Acceleration:" 
+                                      FontWeight="Bold" 
+                                      FontSize="14"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,10,0"/>
+                            <TextBox Text="{Binding MoveAcceleration, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="80"
+                                     FontFamily="Consolas"
+                                     FontSize="14"
+                                     Padding="5,2"
+                                     VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Waypoint List Controls -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button Content="Move to Selected" 
+                                    Click="MoveToWaypointButton_Click"
+                                    Width="150" 
+                                    Height="30"
+                                    Margin="0,0,10,0"
+                                    FontSize="14"/>
+                            <Button Content="Delete Selected" 
+                                    Click="DeleteWaypointButton_Click"
+                                    Width="150" 
+                                    Height="30"
+                                    FontSize="14"/>
+                        </StackPanel>
+
+                        <!-- Waypoint List -->
+                        <Border Grid.Row="3" 
+                                BorderBrush="Gray" 
+                                BorderThickness="1" 
+                                CornerRadius="3"
+                                Margin="0,0,0,10">
+                            <ListBox ItemsSource="{Binding SavedWaypoints}"
+                                     SelectedItem="{Binding SelectedWaypoint}"
+                                     HorizontalContentAlignment="Stretch">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="LightGray" 
+                                                BorderThickness="0,0,0,1" 
+                                                Padding="5">
+                                            <StackPanel>
+                                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#666">
+                                                    <Run Text="Base: "/><Run Text="{Binding JointPositions[0], StringFormat='{}{0:F4}'}"/>
+                                                    <Run Text="  Shoulder: "/><Run Text="{Binding JointPositions[1], StringFormat='{}{0:F4}'}"/>
+                                                    <Run Text="  Elbow: "/><Run Text="{Binding JointPositions[2], StringFormat='{}{0:F4}'}"/>
+                                                </TextBlock>
+                                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#666">
+                                                    <Run Text="Wrist 1: "/><Run Text="{Binding JointPositions[3], StringFormat='{}{0:F4}'}"/>
+                                                    <Run Text="  Wrist 2: "/><Run Text="{Binding JointPositions[4], StringFormat='{}{0:F4}'}"/>
+                                                    <Run Text="  Wrist 3: "/><Run Text="{Binding JointPositions[5], StringFormat='{}{0:F4}'}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Custom URScript Section -->
+                <GroupBox Header="Custom URScript" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBox Text="{Binding CustomScript, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="80"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 FontFamily="Consolas"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Margin="0,10,0,10"
+                                 Padding="5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Send Script" 
+                                    Click="SendScriptButton_Click"
+                                    Width="120" 
+                                    Height="35"
+                                    Margin="0,0,10,0"
+                                    FontSize="14"/>
+                            <TextBlock Text="{Binding ScriptStatus}" 
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="#666"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="20"/>
@@ -390,6 +550,7 @@
                 </GroupBox>
             </Grid>
             </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>

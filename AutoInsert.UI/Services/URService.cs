@@ -3,17 +3,11 @@ using AutoInsert.Shared.Models;
 
 namespace AutoInsert.UI.Services;
 
-public class DebugService
+public class URService
 {
     private readonly URController _urController;
 
-    public DebugService()
-    {
-        var ur = new UR("192.168.0.108");
-        _urController = new URController(ur);
-    }
-
-    public DebugService(UR ur)
+    public URService(UR ur)
     {
         _urController = new URController(ur);
     }
@@ -50,6 +44,12 @@ public class DebugService
     public async Task<ToolData?> GetToolDataAsync()
     {
         return await _urController.GetToolDataAsync();
+    }
+
+    // Move
+    public async Task MoveToPositionAsync(Waypoint waypoint, double speed, double acceleration)
+    {
+        await _urController.MoveToPositionAsync(waypoint, speed, acceleration);
     }
 
     // URScript Execution
