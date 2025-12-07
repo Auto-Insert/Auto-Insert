@@ -31,7 +31,7 @@
 
         <!-- Main Content -->
         <Grid Grid.Row="1">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Hidden">
             <StackPanel>
                 <!-- Connection Section -->
                 <GroupBox Header="Connection" Margin="0,0,0,15">
