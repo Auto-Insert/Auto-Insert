@@ -44,7 +44,7 @@ public class URParserTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(1.5, result.JointPositions[0], 2);
+        Assert.Equal(1.5, result[0], 2);
     }
 
     [Fact]
