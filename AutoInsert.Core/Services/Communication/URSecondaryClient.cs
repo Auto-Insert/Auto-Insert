@@ -34,12 +34,12 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
         }
     }
 
-    public async Task<Waypoint?> GetJointPositionsAsync()
+    public async Task<double[]?> GetJointPositionsAsync()
     {
         // Flush old buffered data first to get latest position
         await FlushSocketBufferAsync();
         
-        // Keep reading packages until we find one with Joint Data
+        // Attempt multiple times to get valid data
         for (int attempt = 0; attempt < 10; attempt++)
         {
             var packageData = await ReceivePackageAsync();
@@ -47,16 +47,37 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
             if (packageData == null)
                 continue;
 
-            var waypoint = _parser.ParseJointPositions(packageData);
-            if (waypoint != null)
-                return waypoint;
+            var jointPositions = _parser.ParseJointPositions(packageData);
+            if (jointPositions != null)
+                return jointPositions;
+            
+            await Task.Delay(50);
+        }
+        
+        return null;
+    } 
+    public async Task<CartesianPositions?> GetCartesianPositionsAsync()
+    {
+        // Flush old buffered data first to get latest position
+        await FlushSocketBufferAsync();
+        
+        // Attempt multiple times to get valid data
+        for (int attempt = 0; attempt < 10; attempt++)
+        {
+            var packageData = await ReceivePackageAsync();
+            
+            if (packageData == null)
+                continue;
+
+            var cartesianPositions = _parser.ParseCartesianPositions(packageData);
+            if (cartesianPositions != null)
+                return cartesianPositions;
             
             await Task.Delay(50);
         }
         
         return null;
     }
-
     public async Task<ToolData?> GetToolDataAsync()
     {
         // Flush old buffered data first
@@ -93,15 +114,13 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
             {
                 byte[] flushBuffer = new byte[bytesAvailable];
                 await _socket.ReceiveAsync(new ArraySegment<byte>(flushBuffer), SocketFlags.None);
-                Console.WriteLine($"[Secondary] Flushed {bytesAvailable} bytes of old data");
             }
             
             // Wait a bit for fresh data to arrive
-            await Task.Delay(150); // Wait for at least one new package (10Hz = 100ms)
+            await Task.Delay(100);
         }
         catch
         {
-            // Ignore flush errors
         }
     }
 

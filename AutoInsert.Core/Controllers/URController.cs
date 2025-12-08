@@ -41,8 +41,26 @@ end
         await _primaryClient.SendURScriptAsync(disableScript);
     }
     
-    // Get current joint positions as Waypoint
-    public async Task<Waypoint?> GetCurrentPositionAsync()
+    // Get waypoint
+    public async Task<Waypoint?> GetWaypointFromCurrentPositionsAsync(string? name = null)
+    {
+        Waypoint waypoint = new()
+        {
+            Name = name,
+            JointPositions = await _secondaryClient.GetJointPositionsAsync(),
+            CartesianPositions = await _secondaryClient.GetCartesianPositionsAsync()
+        };
+        return waypoint;
+    }
+
+    // Get current cartesian positions
+    public async Task<CartesianPositions?> GetCurrentCartesianPositionsAsync()
+    {
+        return await _secondaryClient.GetCartesianPositionsAsync();
+    }
+
+    // Get current joint positions
+    public async Task<double[]?> GetCurrentJointPositionsAsync()
     {
         return await _secondaryClient.GetJointPositionsAsync();
     }
@@ -54,9 +72,9 @@ end
     }
 
     // Move commands
-    public async Task MoveToPositionAsync(Waypoint waypoint, double speed, double acceleration)
+    public async Task MoveToJointPositions(double[] jointPositions, double speed, double acceleration)
     {
-        var positions = string.Join(", ", waypoint.JointPositions.Select(p => p.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)));
+        var positions = string.Join(", ", jointPositions.Select(p => p.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)));
         
         string moveScript = $@"
     def move_to_position():

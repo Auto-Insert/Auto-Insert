@@ -5,7 +5,7 @@ namespace AutoInsert.Core.Utilities;
 
 public class URPackageParser
 {
-    public Waypoint? ParseJointPositions(byte[] data)
+    public double[]? ParseJointPositions(byte[] data)
     {
         if (data.Length < 5)
         {
@@ -37,7 +37,7 @@ public class URPackageParser
 
             if (packageType == PackageTypes.JointData)
             {
-                var waypoint = new Waypoint();
+                var jointPositions = new double[6];
                 
                 for (int i = 0; i < 6; i++)
                 {
@@ -48,16 +48,73 @@ public class URPackageParser
                         return null;
                     }
                     
-                    waypoint.JointPositions[i] = ReadDoubleBigEndian(data, jointOffset);
+                    jointPositions[i] = ReadDoubleBigEndian(data, jointOffset);
                 }
-                return waypoint;
+                return jointPositions;
             }
 
             offset += dataSize;
         }
         return null;
     }
+    public CartesianPositions? ParseCartesianPositions(byte[] data)
+    {
+        if (data.Length < 5)
+        {
+            return null;
+        }
+        int offset = 5;
 
+        while (offset < data.Length - 5)
+        {
+            if (offset + 4 > data.Length)
+                break;
+                
+            int subPackageSize = ReadInt32BigEndian(data, offset);
+            offset += 4;
+
+            if (offset >= data.Length)
+                break;
+
+            byte packageType = data[offset];
+            offset++;
+
+            int dataSize = subPackageSize - 5;
+            
+            if (dataSize < 0 || offset + dataSize > data.Length)
+                break;
+
+            if (packageType == PackageTypes.CartesianInfo)
+            {
+                if (offset + 96 > data.Length)
+                {
+                    return null;
+                }
+                
+                return new CartesianPositions
+                {
+                    // Actual TCP pose (meters and radians)
+                    X = ReadDoubleBigEndian(data, offset),
+                    Y = ReadDoubleBigEndian(data, offset + 8),
+                    Z = ReadDoubleBigEndian(data, offset + 16),
+                    Rx = ReadDoubleBigEndian(data, offset + 24),
+                    Ry = ReadDoubleBigEndian(data, offset + 32),
+                    Rz = ReadDoubleBigEndian(data, offset + 40),
+                    
+                    // TCP Offset
+                    TCPOffsetX = ReadDoubleBigEndian(data, offset + 48),
+                    TCPOffsetY = ReadDoubleBigEndian(data, offset + 56),
+                    TCPOffsetZ = ReadDoubleBigEndian(data, offset + 64),
+                    TCPOffsetRx = ReadDoubleBigEndian(data, offset + 72),
+                    TCPOffsetRy = ReadDoubleBigEndian(data, offset + 80),
+                    TCPOffsetRz = ReadDoubleBigEndian(data, offset + 88)
+                };
+            }
+
+            offset += dataSize;
+        }
+        return null;
+    }
     public ToolData? ParseToolData(byte[] data)
     {
         if (data.Length < 5)
@@ -110,7 +167,7 @@ public class URPackageParser
         }
         return null;
     }
-
+    // Helper methods to parse the packages
     public int ReadInt32BigEndian(byte[] data, int offset)
     {
         if (BitConverter.IsLittleEndian)
@@ -122,7 +179,6 @@ public class URPackageParser
         }
         return BitConverter.ToInt32(data, offset);
     }
-
     private double ReadDoubleBigEndian(byte[] data, int offset)
     {
         if (BitConverter.IsLittleEndian)
@@ -134,7 +190,6 @@ public class URPackageParser
         }
         return BitConverter.ToDouble(data, offset);
     }
-
     private float ReadFloatBigEndian(byte[] data, int offset)
     {
         if (BitConverter.IsLittleEndian)

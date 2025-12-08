@@ -38,7 +38,7 @@ public class URService
     // Position and Tool Data
     public async Task<Waypoint?> GetCurrentPositionAsync()
     {
-        return await _urController.GetCurrentPositionAsync();
+        return await _urController.GetWaypointFromCurrentPositionsAsync();
     }
 
     public async Task<ToolData?> GetToolDataAsync()
@@ -49,7 +49,7 @@ public class URService
     // Move
     public async Task MoveToPositionAsync(Waypoint waypoint, double speed, double acceleration)
     {
-        await _urController.MoveToPositionAsync(waypoint, speed, acceleration);
+        await _urController.MoveToJointPositions(waypoint.JointPositions!, speed, acceleration);
     }
 
     // URScript Execution
