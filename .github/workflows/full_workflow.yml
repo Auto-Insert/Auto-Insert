@@ -14,7 +14,7 @@ on:
         default: false
   push:
     branches:
-      - installer-main
+      - installer-test
 
 jobs:
   build-and-test:
