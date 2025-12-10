@@ -19,7 +19,7 @@ on:
         default: false
 
 jobs:
-  trigger-tests:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -34,6 +34,7 @@ jobs:
         ref: ${{ github.ref }}
         wait_interval: 10
   build-installer:
+    needs: build-and-test
     runs-on: windows-latest
 
     steps:
