@@ -23,16 +23,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Trigger Build and Test Workflow
-      uses: convictional/trigger-workflow-and-wait@v1.6.5
       with:
-        owner: ${{ github.repository_owner }}
-        repo: ${{ github.event.repository.name }}
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        workflow_file_name: build_and_test.yml
-        ref: ${{ github.ref }}
-        wait_interval: 10
+        submodules: 'recursive'
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore
+    
+    - name: Test
+      run: dotnet test --no-build
   build-installer:
     needs: build-and-test
     runs-on: windows-latest
