@@ -1,0 +1,115 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+        default: 'patch'
+      create_release:
+        description: 'Create GitHub Release'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  trigger-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Trigger Build and Test Workflow
+      uses: convictional/trigger-workflow-and-wait@v1.6.5
+      with:
+        owner: ${{ github.repository_owner }}
+        repo: ${{ github.event.repository.name }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow_file_name: build_and_test.yml
+        ref: ${{ github.ref }}
+        wait_interval: 10
+  build-installer:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Get latest tag
+      id: get_tag
+      run: |
+        $latestTag = git describe --tags --abbrev=0 2>$null
+        if (-not $latestTag) {
+          $latestTag = "v0.0.0"
+        }
+        echo "latest_tag=$latestTag" >> $env:GITHUB_OUTPUT
+      shell: powershell
+    
+    - name: Calculate new version
+      id: calc_version
+      run: |
+        $tag = "${{ steps.get_tag.outputs.latest_tag }}"
+        $version = $tag -replace '^v', ''
+        $parts = $version -split '\.'
+        $major = [int]$parts[0]
+        $minor = [int]$parts[1]
+        $patch = [int]$parts[2]
+        
+        switch ("${{ github.event.inputs.bump_type }}") {
+          "major" {
+            $major++
+            $minor = 0
+            $patch = 0
+          }
+          "minor" {
+            $minor++
+            $patch = 0
+          }
+          "patch" {
+            $patch++
+          }
+        }
+        
+        $newVersion = "$major.$minor.$patch"
+        echo "new_version=$newVersion" >> $env:GITHUB_OUTPUT
+      shell: powershell
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Publish Windows Application
+      run: dotnet publish AutoInsert.UI/AutoInsert.UI.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./publish
+    
+    - name: Create Installer with Inno Setup
+      run: |
+        choco install innosetup -y
+        iscc /O"./installer" /F"AutoInsertSetup-${{ steps.calc_version.outputs.new_version }}" "./win-installer.iss"
+      shell: powershell
+    
+    - name: Upload Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: AutoInsert-Installer-${{ steps.calc_version.outputs.new_version }}
+        path: ./installer/AutoInsertSetup-${{ steps.calc_version.outputs.new_version }}.exe
+    
+    - name: Create Release
+      if: github.event.inputs.create_release == 'true'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.calc_version.outputs.new_version }}
+        name: Release v${{ steps.calc_version.outputs.new_version }}
+        files: ./installer/AutoInsertSetup-${{ steps.calc_version.outputs.new_version }}.exe
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
