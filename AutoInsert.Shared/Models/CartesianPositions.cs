@@ -1,3 +1,5 @@
+namespace AutoInsert.Shared.Models;
+
 public class CartesianPositions
 {
     public double X { get; set; }

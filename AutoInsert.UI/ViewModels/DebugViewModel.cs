@@ -23,7 +23,7 @@ public class DebugViewModel : INotifyPropertyChanged
         }
     }
 
-    private string? _robotMode = null;
+    private string? _robotMode = "Not Connected";
     public string? RobotMode
     {
         get => _robotMode;
@@ -112,7 +112,28 @@ public class DebugViewModel : INotifyPropertyChanged
     }
 
     public ObservableCollection<Waypoint> SavedWaypoints { get; } = new();
+    
+    private int _lacPercentage;
+    public int LacPercentage
+    {
+        get => _lacPercentage;
+        set
+        {
+            _lacPercentage = value;
+            OnPropertyChanged();
+        }
+    }
 
+    private string? _lacStatus;
+    public string? LacStatus
+    {
+        get => _lacStatus;
+        set
+        {
+            _lacStatus = value;
+            OnPropertyChanged();
+        }
+    }
     public DebugViewModel()
     {
         var ur = new UR(IpAddress);
@@ -237,7 +258,7 @@ public class DebugViewModel : INotifyPropertyChanged
             // Create a copy of the current position
             var waypoint = new Waypoint
             {
-                JointPositions = CurrentPosition.JointPositions.ToArray()
+                JointPositions = CurrentPosition.JointPositions?.ToArray() ?? Array.Empty<double>()
             };
 
             SavedWaypoints.Add(waypoint);
@@ -379,6 +400,29 @@ public class DebugViewModel : INotifyPropertyChanged
         StopToolDataPolling();
     }
 
+public async Task SetLacPositionAsync()
+{
+    try
+    {
+        LacStatus = "Moving actuator...";
+        
+        var lacService = new AutoInsert.Core.Services.Communication.LinearActuatorService();
+        var result = await Task.Run(() => lacService.SetPosition(LacPercentage));
+        
+        if (result.Success)
+        {
+            LacStatus = "Movement sent";
+        }
+        else
+        {
+            LacStatus = $"Error: {result.Output}";
+        }
+    }
+    catch (Exception ex)
+    {
+        LacStatus = $"Error: {ex.Message}";
+    }
+}
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

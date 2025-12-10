@@ -1,0 +1,3 @@
+[submodule "AutoInsert.Drivers/linear-actuator"]
+	path = AutoInsert.Drivers/linear-actuator
+	url = https://github.com/Auto-Insert/Auto-Insert-Linear-Actuator.git

@@ -4,6 +4,18 @@
     <ProjectReference Include="..\AutoInsert.Shared\AutoInsert.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+      <None Include="..\AutoInsert.Drivers\linear-actuator\lac_control.exe">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\AutoInsert.Drivers\linear-actuator\libusb-1.0.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\AutoInsert.Drivers\linear-actuator\msys-usb-1.0.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
