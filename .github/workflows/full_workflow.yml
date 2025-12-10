@@ -3,15 +3,10 @@ name: Full Workflow
 on:
   workflow_dispatch:
     inputs:
-      bump_type:
-        description: 'Version bump type'
+      version:
+        description: 'Version number (e.g., 1.0.0)'
         required: true
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
-        default: 'patch'
+        type: string
       create_release:
         description: 'Create GitHub Release'
         required: true
@@ -19,7 +14,7 @@ on:
         default: false
   push:
     branches:
-      - installer-test
+      - installer-main
 
 jobs:
   build-and-test:
@@ -51,45 +46,6 @@ jobs:
       with:
         fetch-depth: 0
     
-    - name: Get latest tag
-      id: get_tag
-      run: |
-        $latestTag = git describe --tags --abbrev=0 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-          $latestTag = "v0.0.0"
-        }
-        echo "latest_tag=$latestTag" >> $env:GITHUB_OUTPUT
-      shell: powershell
-    
-    - name: Calculate new version
-      id: calc_version
-      run: |
-        $tag = "${{ steps.get_tag.outputs.latest_tag }}"
-        $version = $tag -replace '^v', ''
-        $parts = $version -split '\.'
-        $major = [int]$parts[0]
-        $minor = [int]$parts[1]
-        $patch = [int]$parts[2]
-        
-        switch ("${{ github.event.inputs.bump_type }}") {
-          "major" {
-            $major++
-            $minor = 0
-            $patch = 0
-          }
-          "minor" {
-            $minor++
-            $patch = 0
-          }
-          "patch" {
-            $patch++
-          }
-        }
-        
-        $newVersion = "$major.$minor.$patch"
-        echo "new_version=$newVersion" >> $env:GITHUB_OUTPUT
-      shell: powershell
-    
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -104,22 +60,22 @@ jobs:
     - name: Create Installer with Inno Setup
       run: |
         choco install innosetup -y
-        iscc /O"./installer" /F"AutoInsertSetup-${{ steps.calc_version.outputs.new_version }}" "./win-installer.iss"
+        iscc /O"./installer" /F"AutoInsertSetup-${{ github.event.inputs.version }}" "./win-installer.iss"
       shell: powershell
     
     - name: Upload Installer
       uses: actions/upload-artifact@v4
       with:
-        name: AutoInsert-Installer-${{ steps.calc_version.outputs.new_version }}
-        path: ./installer/AutoInsertSetup-${{ steps.calc_version.outputs.new_version }}.exe
+        name: AutoInsert-Installer-${{ github.event.inputs.version }}
+        path: ./installer/AutoInsertSetup-${{ github.event.inputs.version }}.exe
     
     - name: Create Release
       if: github.event.inputs.create_release == 'true'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.calc_version.outputs.new_version }}
-        name: Release v${{ steps.calc_version.outputs.new_version }}
-        files: ./installer/AutoInsertSetup-${{ steps.calc_version.outputs.new_version }}.exe
+        tag_name: v${{ github.event.inputs.version }}
+        name: Release v${{ github.event.inputs.version }}
+        files: ./installer/AutoInsertSetup-${{ github.event.inputs.version }}.exe
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
