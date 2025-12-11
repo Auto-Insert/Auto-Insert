@@ -113,24 +113,24 @@ public class DebugViewModel : INotifyPropertyChanged
 
     public ObservableCollection<Waypoint> SavedWaypoints { get; } = new();
     
-    private int _lacPercentage;
-    public int LacPercentage
+    private int _extensionPercentage;
+    public int ExtensionPercentage
     {
-        get => _lacPercentage;
+        get => _extensionPercentage;
         set
         {
-            _lacPercentage = value;
+            _extensionPercentage = value;
             OnPropertyChanged();
         }
     }
 
-    private string? _lacStatus;
-    public string? LacStatus
+    private string? _extensionStatus;
+    public string? ExtensionStatus
     {
-        get => _lacStatus;
+        get => _extensionStatus;
         set
         {
-            _lacStatus = value;
+            _extensionStatus = value;
             OnPropertyChanged();
         }
     }
@@ -400,27 +400,26 @@ public class DebugViewModel : INotifyPropertyChanged
         StopToolDataPolling();
     }
 
-public async Task SetLacPositionAsync()
+public async Task SetScrewdriverExtensionAsync()
 {
     try
     {
-        LacStatus = "Moving actuator...";
+        ExtensionStatus = "Moving actuator...";
         
-        var lacService = new AutoInsert.Core.Services.Communication.LinearActuatorService();
-        var result = await Task.Run(() => lacService.SetPosition(LacPercentage));
+        var result = await ScrewingStationService.ExtendScrewdriverAsync(ExtensionPercentage);
         
         if (result.Success)
         {
-            LacStatus = "Movement sent";
+            ExtensionStatus = "Movement sent";
         }
         else
         {
-            LacStatus = $"Error: {result.Output}";
+            ExtensionStatus = $"Error: {result.Output}";
         }
     }
     catch (Exception ex)
     {
-        LacStatus = $"Error: {ex.Message}";
+        ExtensionStatus = $"Error: {ex.Message}";
     }
 }
     public event PropertyChangedEventHandler? PropertyChanged;

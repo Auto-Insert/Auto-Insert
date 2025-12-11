@@ -84,9 +84,9 @@ public partial class DebugPage : Page
         await viewModel.MoveToSelectedWaypointAsync();
     }
 
-    private async void SetLacPositionButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    private async void SetScrewdriverExtensionButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         var viewModel = (DebugViewModel)DataContext;
-        await viewModel.SetLacPositionAsync();
+        await viewModel.SetScrewdriverExtensionAsync();
     }
 }

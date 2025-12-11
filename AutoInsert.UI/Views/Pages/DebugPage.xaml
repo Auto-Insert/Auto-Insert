@@ -561,7 +561,7 @@
                                   FontSize="14"
                                   VerticalAlignment="Center"
                                   Margin="0,0,10,0"/>
-                        <TextBox Text="{Binding LacPercentage, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox Text="{Binding ExtensionPercentage, UpdateSourceTrigger=PropertyChanged}"
                                  Width="100"
                                  FontFamily="Consolas"
                                  FontSize="14"
@@ -569,12 +569,12 @@
                                  VerticalAlignment="Center"
                                  Margin="0,0,10,0"/>
                         <Button Content="Set Position"
-                                Click="SetLacPositionButton_Click"
+                                Click="SetScrewdriverExtensionButton_Click"
                                 Width="120" 
                                 Height="35"
                                 FontSize="14"
                                 Margin="0,0,10,0"/>
-                        <TextBlock Text="{Binding LacStatus}" 
+                        <TextBlock Text="{Binding ExtensionStatus}" 
                                    VerticalAlignment="Center"
                                    FontSize="14"
                                    Foreground="#666"/>
