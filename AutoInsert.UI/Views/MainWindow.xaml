@@ -1,8 +1,41 @@
-﻿<Window x:Class="AutoInsert.UI.MainWindow"
+﻿<ui:FluentWindow x:Class="AutoInsert.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Auto-Insert" Height="720" Width="1280">
-    <Frame x:Name="MainFrame" 
-           NavigationUIVisibility="Hidden"
-           Navigated="MainFrame_Navigated"/>
-</Window>
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:pages="clr-namespace:AutoInsert.UI.Pages"
+        Title="Auto-Insert" 
+        Height="720" 
+        Width="1280"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <ui:TitleBar Grid.Row="0" Title="Auto-Insert" />
+        
+        <ui:NavigationView x:Name="MainNavigation"
+                          Grid.Row="1"
+                          IsBackButtonVisible="Collapsed"
+                          IsPaneToggleVisible="True"
+                          PaneDisplayMode="Left"
+                          OpenPaneLength="200">
+            <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem
+                    Content="Configuration"
+                    Icon="{ui:SymbolIcon Settings24}"
+                    TargetPageType="{x:Type pages:ConfigurationPage}" />
+            </ui:NavigationView.MenuItems>
+            <ui:NavigationView.FooterMenuItems>
+                <ui:NavigationViewItem
+                    Content="Debug"
+                    Icon="{ui:SymbolIcon Bug24}"
+                    TargetPageType="{x:Type pages:DebugPage}" />
+            </ui:NavigationView.FooterMenuItems>
+        </ui:NavigationView>
+    </Grid>
+</ui:FluentWindow>

@@ -2,25 +2,22 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:local="clr-namespace:AutoInsert.UI.Pages"
       xmlns:vm="clr-namespace:AutoInsert.UI.ViewModels"
       xmlns:converters="clr-namespace:AutoInsert.UI.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="800"
-      Title="Debug">
+      Title="Debug"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
     <Page.Resources>
         <converters:RadiansToDegreeConverter x:Key="RadiansToDegreeConverter"/>
         <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
     </Page.Resources>
-    <Page.DataContext>
-        <vm:DebugViewModel/>
-    </Page.DataContext>
-
-    <ScrollViewer VerticalScrollBarVisibility="Hidden"
-                    Margin="20"
-                    ScrollViewer.CanContentScroll="True">
-        <StackPanel>
+        <StackPanel Margin="20">
             <!-- UR Robot Section -->
             <TextBlock Text="UR Robot" 
                        FontSize="24" 
@@ -28,7 +25,11 @@
                        Margin="0,0,0,20"/>
 
             <!-- Connection Section -->
-            <GroupBox Header="Connection" Margin="0,0,0,15">
+            <TextBlock Text="Connection" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
                         <TextBlock Text="IP Address: " 
@@ -54,14 +55,17 @@
                                 FontWeight="Bold" 
                                 FontSize="16"/>
                         <TextBlock Text="{Binding RobotMode}" 
-                                FontSize="16"
-                                Foreground="Blue"/>
+                                FontSize="16"/>
                     </StackPanel>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
 
             <!-- Control Section -->
-            <GroupBox Header="Robot Control" Margin="0,0,0,15">
+            <TextBlock Text="Control" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,10">
                         <Button Content="Enable Freedrive" 
@@ -77,10 +81,14 @@
                                 FontSize="14"/>
                     </StackPanel>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
 
             <!-- Waypoint Section -->
-            <GroupBox Header="Waypoint Testing" Margin="0,0,0,15">
+            <TextBlock Text="Waypoint" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -173,10 +181,14 @@
                         </ListBox>
                     </Border>
                 </Grid>
-            </GroupBox>
+            </ui:Card>
 
             <!-- Custom URScript Section -->
-            <GroupBox Header="Custom URScript" Margin="0,0,0,15">
+            <TextBlock Text="Custom URScript" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel>
                     <TextBox Text="{Binding CustomScript, UpdateSourceTrigger=PropertyChanged}"
                              Height="80"
@@ -199,8 +211,12 @@
                                    Foreground="#666"/>
                     </StackPanel>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
 
+            <TextBlock Text="Robot Status" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
             <Grid Margin="0,0,0,15">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -209,7 +225,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Column: Joint Positions -->
-                <GroupBox Grid.Column="0" Header="Current Joint Positions">
+                <ui:Card Grid.Column="0">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -376,10 +392,10 @@
                             <Run Text="("/><Run Text="{Binding CurrentPosition[5], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
                         </TextBlock>
                     </Grid>
-                </GroupBox>
+                </ui:Card>
 
                 <!-- Right Column: Tool Data -->
-                <GroupBox Grid.Column="2" Header="Tool Data">
+                <ui:Card Grid.Column="2">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -542,7 +558,7 @@
                                     Text="{Binding CurrentToolData.ToolMode}"/>
                         </Border>
                     </Grid>
-                </GroupBox>
+                </ui:Card>
             </Grid>
 
             <!-- Separator -->
@@ -555,7 +571,11 @@
                        Margin="0,0,0,20"/>
 
             <!-- UART Connection Section -->
-            <GroupBox Header="UART Connection" Margin="0,0,0,15">
+            <TextBlock Text="Serial Port" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
                     <TextBlock Text="Serial Port:" 
                               FontWeight="Bold" 
@@ -580,10 +600,14 @@
                                FontSize="14"
                                Foreground="#666"/>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
 
             <!-- Servo Motor Control -->
-            <GroupBox Header="Servo Motor" Margin="0,0,0,15">
+            <TextBlock Text="Servo Motor" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
                         <TextBlock Text="Degrees (0-180):" 
@@ -611,10 +635,14 @@
                                    Foreground="#666"/>
                     </StackPanel>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
 
             <!-- Stepper Motor Control -->
-            <GroupBox Header="Stepper Motor" Margin="0,0,0,15">
+            <TextBlock Text="Stepper Motor" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel>
                     <Grid Margin="0,10,0,10">
                         <Grid.RowDefinitions>
@@ -704,10 +732,14 @@
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
 
             <!-- Solenoid Actuator Control -->
-            <GroupBox Header="Solenoid Actuator" Margin="0,0,0,15">
+            <TextBlock Text="Solenoid Actuator" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel>
                     <Grid Margin="0,10,0,10">
                         <Grid.RowDefinitions>
@@ -772,7 +804,7 @@
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
 
             <!-- Separator -->
             <Separator Margin="0,20,0,20"/>
@@ -783,7 +815,11 @@
                        FontWeight="Bold" 
                        Margin="0,0,0,20"/>
 
-            <GroupBox Header="Control" Margin="0,0,0,15">
+            <TextBlock Text="Linear Actuator" 
+                FontSize="18" 
+                FontWeight="Bold" 
+                Margin="0,0,0,20"/>
+            <ui:Card Margin="0,0,0,15">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
                         <TextBlock Text="Extension (0-100%):" 
@@ -810,7 +846,6 @@
                                    Foreground="#666"/>
                     </StackPanel>
                 </StackPanel>
-            </GroupBox>
+            </ui:Card>
         </StackPanel>
-    </ScrollViewer>
 </Page>

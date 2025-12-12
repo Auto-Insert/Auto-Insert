@@ -45,4 +45,8 @@
       <ProjectReference Include="..\AutoInsert.Shared\AutoInsert.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="WPF-UI" Version="4.1.0" />
+    </ItemGroup>
+
 </Project>

@@ -1,117 +1,76 @@
 using System.Windows.Controls;
-using System.Windows.Input;
 using AutoInsert.UI.ViewModels;
 
 namespace AutoInsert.UI.Pages;
 
 public partial class DebugPage : Page
 {
+    private readonly DebugViewModel _viewModel;
+
     public DebugPage()
     {
         InitializeComponent();
-        Loaded += DebugPage_Loaded;
-        PreviewKeyDown += DebugPage_PreviewKeyDown;
-        Focusable = true;
-    }
-
-    private async void DebugPage_Loaded(object sender, System.Windows.RoutedEventArgs e)
-    {
-        if (DataContext is DebugViewModel viewModel)
-        {
-            await viewModel.LoadAvailableSerialPortsAsync();
-            await viewModel.InitializeAsync();
-        }
-        
-        // Set focus to enable keyboard input
-        Keyboard.Focus(this);
-    }
-
-    private void DebugPage_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-        {
-            // Stop polling before navigating away
-            if (DataContext is DebugViewModel viewModel)
-            {
-                viewModel.StopAllPolling();
-            }
-            
-            // Navigate back to configuration page
-            NavigationService?.Navigate(new ConfigurationPage());
-            
-            e.Handled = true;
-        }
+        _viewModel = new DebugViewModel();
+        DataContext = _viewModel;
     }
 
     private async void ReconnectButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.ReconnectAsync();
+        await _viewModel.ReconnectAsync();
     }
 
     private async void EnableFreedriveButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.EnableFreedriveAsync();
+        await _viewModel.EnableFreedriveAsync();
     }
 
     private async void DisableFreedriveButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.DisableFreedriveAsync();
+        await _viewModel.DisableFreedriveAsync();
     }
 
     private async void SendScriptButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.SendCustomScriptAsync();
+        await _viewModel.SendCustomScriptAsync();
     }
 
     private void SaveWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        viewModel.SaveCurrentWaypoint();
+        _viewModel.SaveCurrentWaypoint();
     }
 
     private void DeleteWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        viewModel.DeleteSelectedWaypoint();
+        _viewModel.DeleteSelectedWaypoint();
     }
 
     private async void MoveToWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.MoveToSelectedWaypointAsync();
+        await _viewModel.MoveToSelectedWaypointAsync();
     }
 
     private async void SetScrewdriverExtensionButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.SetScrewdriverExtensionAsync();
+        await _viewModel.SetScrewdriverExtensionAsync();
     }
 
     private async void MoveServoButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.MoveServoMotorAsync();
+        await _viewModel.MoveServoMotorAsync();
     }
 
     private async void MoveStepperButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.MoveStepperMotorAsync();
+        await _viewModel.MoveStepperMotorAsync();
     }
 
     private async void MoveSolenoidButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.MoveSolenoidActuatorAsync();
+        await _viewModel.MoveSolenoidActuatorAsync();
     }
 
     private async void RefreshPortsButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        var viewModel = (DebugViewModel)DataContext;
-        await viewModel.LoadAvailableSerialPortsAsync();
+        await _viewModel.LoadAvailableSerialPortsAsync();
     }
 }
