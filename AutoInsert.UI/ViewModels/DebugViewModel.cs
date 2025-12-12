@@ -1,18 +1,18 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using AutoInsert.Core.Controllers;
 using AutoInsert.Shared.Models;
-using AutoInsert.UI.Services;
+using AutoInsert.Core.Services.Communication;
 
 namespace AutoInsert.UI.ViewModels;
 
 public class DebugViewModel : INotifyPropertyChanged
 {
-    private URService urService;
+    private DebugController debugController;
     private CancellationTokenSource? _cancellationTokenSource;
     private CancellationTokenSource? _toolDataCancellationTokenSource;
-    
-    private string _ipAddress = "192.168.1.1";
+    private string _ipAddress = "192.168.0.108";
     public string IpAddress
     {
         get => _ipAddress;
@@ -22,7 +22,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
     private string? _robotMode = "Not Connected";
     public string? RobotMode
     {
@@ -33,9 +32,8 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    
-    private Waypoint? _currentPosition;
-    public Waypoint? CurrentPosition
+    private double[]? _currentPosition;
+    public double[]? CurrentPosition
     {
         get => _currentPosition;
         set
@@ -44,7 +42,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    
     private ToolData? _currentToolData;
     public ToolData? CurrentToolData
     {
@@ -55,7 +52,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
     private string _customScript = "";
     public string CustomScript
     {
@@ -66,7 +62,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
     private string _scriptStatus = "";
     public string ScriptStatus
     {
@@ -77,7 +72,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
     private double _moveSpeed = 0.25;
     public double MoveSpeed
     {
@@ -88,7 +82,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
     private double _moveAcceleration = 1.2;
     public double MoveAcceleration
     {
@@ -99,9 +92,8 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
-    private Waypoint? _selectedWaypoint;
-    public Waypoint? SelectedWaypoint
+    private double[]? _selectedWaypoint;
+    public double[]? SelectedWaypoint
     {
         get => _selectedWaypoint;
         set
@@ -110,9 +102,15 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
-    public ObservableCollection<Waypoint> SavedWaypoints { get; } = new();
-    
+    private ObservableCollection<double[]> _savedWaypoints = new();
+    public ObservableCollection<double[]> SavedWaypoints {
+        get => _savedWaypoints;
+        set
+        {
+            _savedWaypoints = value;
+            OnPropertyChanged();
+        }
+    }
     private int _extensionPercentage;
     public int ExtensionPercentage
     {
@@ -123,7 +121,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
     private string? _extensionStatus;
     public string? ExtensionStatus
     {
@@ -134,21 +131,141 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+    private ObservableCollection<string> _availableSerialPorts = new();
+    public ObservableCollection<string> AvailableSerialPorts
+    {
+        get => _availableSerialPorts;
+        set
+        {
+            _availableSerialPorts = value;
+            OnPropertyChanged();
+        }
+    }
+    private string _selectedSerialPort = "COM6";
+    public string SelectedSerialPort
+    {
+        get => _selectedSerialPort;
+        set
+        {
+            _selectedSerialPort = value;
+            OnPropertyChanged();
+        }
+    }
+
+    // UART Motor Control Properties
+    private int _servoDegrees = 90;
+    public int ServoDegrees
+    {
+        get => _servoDegrees;
+        set
+        {
+            _servoDegrees = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string? _servoStatus;
+    public string? ServoStatus
+    {
+        get => _servoStatus;
+        set
+        {
+            _servoStatus = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private int _stepperMotorSelection = 1; // 1=Rail, 2=Pump, 3=Tool
+    public int StepperMotorSelection
+    {
+        get => _stepperMotorSelection;
+        set
+        {
+            _stepperMotorSelection = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private int _stepperDirection = 1; // 0=AntiClockwise, 1=Clockwise
+    public int StepperDirection
+    {
+        get => _stepperDirection;
+        set
+        {
+            _stepperDirection = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private int _stepperSteps = 1000;
+    public int StepperSteps
+    {
+        get => _stepperSteps;
+        set
+        {
+            _stepperSteps = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string? _stepperStatus;
+    public string? StepperStatus
+    {
+        get => _stepperStatus;
+        set
+        {
+            _stepperStatus = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private int _solenoidActuatorNumber = 1;
+    public int SolenoidActuatorNumber
+    {
+        get => _solenoidActuatorNumber;
+        set
+        {
+            _solenoidActuatorNumber = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private int _solenoidMovement = 0; // 0=Extend, 1=Retract
+    public int SolenoidMovement
+    {
+        get => _solenoidMovement;
+        set
+        {
+            _solenoidMovement = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string? _solenoidStatus;
+    public string? SolenoidStatus
+    {
+        get => _solenoidStatus;
+        set
+        {
+            _solenoidStatus = value;
+            OnPropertyChanged();
+        }
+    }
+    
     public DebugViewModel()
     {
-        var ur = new UR(IpAddress);
-        urService = new URService(ur);
+        debugController = new DebugController(IpAddress, _selectedSerialPort);
     }
     
     public async Task InitializeAsync()
     {
         try
         {
-            bool connected = await urService.ConnectAsync();
+            bool connected = await debugController.ConnectAsync();
             
             if (connected)
             {
-                RobotMode = await urService.GetRobotModeAsync();
+                RobotMode = await debugController.GetRobotModeAsync();
                 
                 StartPositionPolling();
                 StartToolDataPolling();
@@ -171,17 +288,16 @@ public class DebugViewModel : INotifyPropertyChanged
             // Stop polling
             StopAllPolling();
 
-            // Create new service with updated IP
-            var ur = new UR(IpAddress);
-            urService = new URService(ur);
+            // Create new controller with updated IP
+            debugController = new DebugController(_ipAddress, _selectedSerialPort);
 
             // Connect
             ScriptStatus = "Connecting...";
-            bool connected = await urService.ConnectAsync();
+            bool connected = await debugController.ConnectAsync();
             
             if (connected)
             {
-                RobotMode = await urService.GetRobotModeAsync();
+                RobotMode = await debugController.GetRobotModeAsync();
                 ScriptStatus = "Connected successfully";
                 
                 StartPositionPolling();
@@ -200,11 +316,12 @@ public class DebugViewModel : INotifyPropertyChanged
         }
     }
 
+    // UR Robot Control
     public async Task EnableFreedriveAsync()
     {
         try
         {
-            await urService.EnableFreedriveAsync();
+            await debugController.EnableFreedriveAsync();
             ScriptStatus = "Freedrive enabled";
         }
         catch (Exception ex)
@@ -217,7 +334,7 @@ public class DebugViewModel : INotifyPropertyChanged
     {
         try
         {
-            await urService.DisableFreedriveAsync();
+            await debugController.DisableFreedriveAsync();
             ScriptStatus = "Freedrive disabled";
         }
         catch (Exception ex)
@@ -236,7 +353,7 @@ public class DebugViewModel : INotifyPropertyChanged
                 return;
             }
 
-            bool success = await urService.SendURScriptAsync(CustomScript);
+            bool success = await debugController.SendURScriptAsync(CustomScript);
             ScriptStatus = success ? "Script sent successfully" : "Failed to send script";
         }
         catch (Exception ex)
@@ -255,13 +372,7 @@ public class DebugViewModel : INotifyPropertyChanged
                 return;
             }
 
-            // Create a copy of the current position
-            var waypoint = new Waypoint
-            {
-                JointPositions = CurrentPosition.JointPositions?.ToArray() ?? Array.Empty<double>()
-            };
-
-            SavedWaypoints.Add(waypoint);
+            SavedWaypoints.Add(CurrentPosition);
             ScriptStatus = $"Waypoint saved (Total: {SavedWaypoints.Count})";
         }
         catch (Exception ex)
@@ -301,7 +412,7 @@ public class DebugViewModel : INotifyPropertyChanged
             }
 
             ScriptStatus = $"Moving to waypoint (v={MoveSpeed}, a={MoveAcceleration})...";
-            await urService.MoveToPositionAsync(SelectedWaypoint, MoveSpeed, MoveAcceleration);
+            await debugController.MoveToJointPositions(SelectedWaypoint, MoveSpeed, MoveAcceleration);
             ScriptStatus = "Move command sent";
         }
         catch (Exception ex)
@@ -323,7 +434,7 @@ public class DebugViewModel : INotifyPropertyChanged
             {
                 try
                 {
-                    var position = await urService.GetCurrentPositionAsync();
+                    var position = await debugController.GetCurrentJointPositionsAsync();
                     
                     // Update on UI thread
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -331,7 +442,7 @@ public class DebugViewModel : INotifyPropertyChanged
                         CurrentPosition = position;
                     });
 
-                    await Task.Delay(150, _cancellationTokenSource.Token);
+                    await Task.Delay(50, _cancellationTokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -360,7 +471,7 @@ public class DebugViewModel : INotifyPropertyChanged
             {
                 try
                 {
-                    var toolData = await urService.GetToolDataAsync();
+                    var toolData = await debugController.GetToolDataAsync();
                     
                     // Update on UI thread
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -400,28 +511,95 @@ public class DebugViewModel : INotifyPropertyChanged
         StopToolDataPolling();
     }
 
-public async Task SetScrewdriverExtensionAsync()
-{
-    try
+    // LAC Control
+    public async Task SetScrewdriverExtensionAsync()
     {
-        ExtensionStatus = "Moving actuator...";
-        
-        var result = await ScrewingStationService.ExtendScrewdriverAsync(ExtensionPercentage);
-        
-        if (result.Success)
+        try
         {
-            ExtensionStatus = "Movement sent";
+            ExtensionStatus = "Moving actuator...";
+            
+            var result = await debugController.ExtendScrewdriverAsync(ExtensionPercentage);
+            
+            if (result.Success)
+            {
+                ExtensionStatus = "Movement sent";
+            }
+            else
+            {
+                ExtensionStatus = $"Error: {result.Output}";
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ExtensionStatus = $"Error: {result.Output}";
+            ExtensionStatus = $"Error: {ex.Message}";
         }
     }
-    catch (Exception ex)
+
+    // UART Motors Control
+    public async Task LoadAvailableSerialPortsAsync()
     {
-        ExtensionStatus = $"Error: {ex.Message}";
+        try
+        {
+            var ports = await DebugController.GetAvailableSerialPortsAsync();
+            AvailableSerialPorts.Clear();
+            foreach (var port in ports)
+            {
+                AvailableSerialPorts.Add(port);
+            }
+        }
+        catch (Exception ex)
+        {
+            ScriptStatus = $"Error loading serial ports: {ex.Message}";
+        }
     }
-}
+
+    public async Task MoveServoMotorAsync()
+    {
+        try
+        {
+            ServoStatus = $"Moving servo to {ServoDegrees}°...";
+            var result = await debugController.MoveServoMotorAsync(ServoDegrees);
+            ServoStatus = result.Success ? result.Message : $"Error: {result.Message}";
+        }
+        catch (Exception ex)
+        {
+            ServoStatus = $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task MoveStepperMotorAsync()
+    {
+        try
+        {
+            var motor = (StepperMotorService.Motor)StepperMotorSelection;
+            var direction = (StepperMotorService.Direction)StepperDirection;
+            
+            StepperStatus = $"Moving {motor} motor {direction} {StepperSteps} steps...";
+            var result = await debugController.MoveStepperMotorAsync(motor, direction, StepperSteps);
+            StepperStatus = result.Success ? result.Message : $"Error: {result.Message}";
+        }
+        catch (Exception ex)
+        {
+            StepperStatus = $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task MoveSolenoidActuatorAsync()
+    {
+        try
+        {
+            var movement = (SolenoidActuatorService.ActuatorMovement)SolenoidMovement;
+            
+            SolenoidStatus = $"Moving actuator {SolenoidActuatorNumber} to {movement}...";
+            var result = await debugController.MoveSolenoidActuatorAsync(SolenoidActuatorNumber, movement);
+            SolenoidStatus = result.Success ? result.Message : $"Error: {result.Message}";
+        }
+        catch (Exception ex)
+        {
+            SolenoidStatus = $"Error: {ex.Message}";
+        }
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

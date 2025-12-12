@@ -49,11 +49,11 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
 
             var jointPositions = _parser.ParseJointPositions(packageData);
             if (jointPositions != null)
+            {
                 return jointPositions;
-            
-            await Task.Delay(50);
+            }
+            await Task.Delay(150);
         }
-        
         return null;
     } 
     public async Task<CartesianPositions?> GetCartesianPositionsAsync()
@@ -94,7 +94,7 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
             if (toolData != null)
                 return toolData;
             
-            await Task.Delay(50);
+            await Task.Delay(150);
         }
         
         return null;
@@ -117,7 +117,7 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
             }
             
             // Wait a bit for fresh data to arrive
-            await Task.Delay(100);
+            await Task.Delay(150);
         }
         catch
         {

@@ -18,6 +18,7 @@ public partial class DebugPage : Page
     {
         if (DataContext is DebugViewModel viewModel)
         {
+            await viewModel.LoadAvailableSerialPortsAsync();
             await viewModel.InitializeAsync();
         }
         
@@ -88,5 +89,29 @@ public partial class DebugPage : Page
     {
         var viewModel = (DebugViewModel)DataContext;
         await viewModel.SetScrewdriverExtensionAsync();
+    }
+
+    private async void MoveServoButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.MoveServoMotorAsync();
+    }
+
+    private async void MoveStepperButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.MoveStepperMotorAsync();
+    }
+
+    private async void MoveSolenoidButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.MoveSolenoidActuatorAsync();
+    }
+
+    private async void RefreshPortsButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var viewModel = (DebugViewModel)DataContext;
+        await viewModel.LoadAvailableSerialPortsAsync();
     }
 }

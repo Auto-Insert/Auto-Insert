@@ -3,12 +3,12 @@ using AutoInsert.Core.Services.Communication;
 
 namespace AutoInsert.Core.Controllers;
 
-public class URController(UR ur)
+public class URController(string urIPAddress)
 {
-    public UR UR { get; } = ur;
-    private readonly URDashboardClient _dashboardClient = new(ur.IPAddress);
-    private readonly URPrimaryClient _primaryClient = new(ur.IPAddress);
-    private readonly URSecondaryClient _secondaryClient = new(ur.IPAddress);
+    public string URIPAddress { get; } = urIPAddress;
+    private readonly URDashboardClient _dashboardClient = new(urIPAddress);
+    private readonly URPrimaryClient _primaryClient = new(urIPAddress);
+    private readonly URSecondaryClient _secondaryClient = new(urIPAddress);
     public async Task<bool> ConnectAsync()
     {
         bool dashboardConnected = await _dashboardClient.ConnectAsync();

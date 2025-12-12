@@ -11,6 +11,7 @@
       Title="Debug">
     <Page.Resources>
         <converters:RadiansToDegreeConverter x:Key="RadiansToDegreeConverter"/>
+        <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
     </Page.Resources>
     <Page.DataContext>
         <vm:DebugViewModel/>
@@ -156,14 +157,14 @@
                                             Padding="5">
                                         <StackPanel>
                                             <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#666">
-                                                <Run Text="Base: "/><Run Text="{Binding JointPositions[0], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Shoulder: "/><Run Text="{Binding JointPositions[1], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Elbow: "/><Run Text="{Binding JointPositions[2], StringFormat='{}{0:F4}'}"/>
+                                                <Run Text="Base: "/><Run Text="{Binding SelectedWaypoint[0], StringFormat='{}{0:F4}'}"/>
+                                                <Run Text="  Shoulder: "/><Run Text="{Binding SelectedWaypoint[1], StringFormat='{}{0:F4}'}"/>
+                                                <Run Text="  Elbow: "/><Run Text="{Binding SelectedWaypoint[2], StringFormat='{}{0:F4}'}"/>
                                             </TextBlock>
                                             <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#666">
-                                                <Run Text="Wrist 1: "/><Run Text="{Binding JointPositions[3], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Wrist 2: "/><Run Text="{Binding JointPositions[4], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Wrist 3: "/><Run Text="{Binding JointPositions[5], StringFormat='{}{0:F4}'}"/>
+                                                <Run Text="Wrist 1: "/><Run Text="{Binding SelectedWaypoint[3], StringFormat='{}{0:F4}'}"/>
+                                                <Run Text="  Wrist 2: "/><Run Text="{Binding SelectedWaypoint[4], StringFormat='{}{0:F4}'}"/>
+                                                <Run Text="  Wrist 3: "/><Run Text="{Binding SelectedWaypoint[5], StringFormat='{}{0:F4}'}"/>
                                             </TextBlock>
                                         </StackPanel>
                                     </Border>
@@ -238,7 +239,7 @@
                             Padding="8,4"
                             Margin="0,2">
                             <TextBlock FontFamily="Consolas" FontSize="12">
-                                <Run Text="{Binding CurrentPosition.JointPositions[0], StringFormat='{}{0:F4} rad'}"/>
+                                <Run Text="{Binding CurrentPosition[0], StringFormat='{}{0:F4} rad'}"/>
                             </TextBlock>
                         </Border>
                         <TextBlock Grid.Row="0" Grid.Column="2" 
@@ -247,7 +248,7 @@
                                 Margin="10,5,0,5"
                                 VerticalAlignment="Center"
                                 Foreground="#666">
-                            <Run Text="("/><Run Text="{Binding CurrentPosition.JointPositions[0], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
+                            <Run Text="("/><Run Text="{Binding CurrentPosition[0], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
                         </TextBlock>
 
                         <!-- Joint 2 - Shoulder -->
@@ -263,7 +264,7 @@
                             Padding="8,4"
                             Margin="0,2">
                             <TextBlock FontFamily="Consolas" FontSize="12">
-                                <Run Text="{Binding CurrentPosition.JointPositions[1], StringFormat='{}{0:F4} rad'}"/>
+                                <Run Text="{Binding CurrentPosition[1], StringFormat='{}{0:F4} rad'}"/>
                             </TextBlock>
                         </Border>
                         <TextBlock Grid.Row="1" Grid.Column="2" 
@@ -272,7 +273,7 @@
                                 Margin="10,5,0,5"
                                 VerticalAlignment="Center"
                                 Foreground="#666">
-                            <Run Text="("/><Run Text="{Binding CurrentPosition.JointPositions[1], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
+                            <Run Text="("/><Run Text="{Binding CurrentPosition[1], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
                         </TextBlock>
 
                         <!-- Joint 3 - Elbow -->
@@ -288,7 +289,7 @@
                             Padding="8,4"
                             Margin="0,2">
                             <TextBlock FontFamily="Consolas" FontSize="12">
-                                <Run Text="{Binding CurrentPosition.JointPositions[2], StringFormat='{}{0:F4} rad'}"/>
+                                <Run Text="{Binding CurrentPosition[2], StringFormat='{}{0:F4} rad'}"/>
                             </TextBlock>
                         </Border>
                         <TextBlock Grid.Row="2" Grid.Column="2" 
@@ -297,7 +298,7 @@
                                 Margin="10,5,0,5"
                                 VerticalAlignment="Center"
                                 Foreground="#666">
-                            <Run Text="("/><Run Text="{Binding CurrentPosition.JointPositions[2], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
+                            <Run Text="("/><Run Text="{Binding CurrentPosition[2], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
                         </TextBlock>
 
                         <!-- Joint 4 - Wrist 1 -->
@@ -313,7 +314,7 @@
                             Padding="8,4"
                             Margin="0,2">
                             <TextBlock FontFamily="Consolas" FontSize="12">
-                                <Run Text="{Binding CurrentPosition.JointPositions[3], StringFormat='{}{0:F4} rad'}"/>
+                                <Run Text="{Binding CurrentPosition[3], StringFormat='{}{0:F4} rad'}"/>
                             </TextBlock>
                         </Border>
                         <TextBlock Grid.Row="3" Grid.Column="2" 
@@ -322,7 +323,7 @@
                                 Margin="10,5,0,5"
                                 VerticalAlignment="Center"
                                 Foreground="#666">
-                            <Run Text="("/><Run Text="{Binding CurrentPosition.JointPositions[3], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
+                            <Run Text="("/><Run Text="{Binding CurrentPosition[3], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
                         </TextBlock>
 
                         <!-- Joint 5 - Wrist 2 -->
@@ -338,7 +339,7 @@
                             Padding="8,4"
                             Margin="0,2">
                             <TextBlock FontFamily="Consolas" FontSize="12">
-                                <Run Text="{Binding CurrentPosition.JointPositions[4], StringFormat='{}{0:F4} rad'}"/>
+                                <Run Text="{Binding CurrentPosition[4], StringFormat='{}{0:F4} rad'}"/>
                             </TextBlock>
                         </Border>
                         <TextBlock Grid.Row="4" Grid.Column="2" 
@@ -347,7 +348,7 @@
                                 Margin="10,5,0,5"
                                 VerticalAlignment="Center"
                                 Foreground="#666">
-                            <Run Text="("/><Run Text="{Binding CurrentPosition.JointPositions[4], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
+                            <Run Text="("/><Run Text="{Binding CurrentPosition[4], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
                         </TextBlock>
 
                         <!-- Joint 6 - Wrist 3 -->
@@ -363,7 +364,7 @@
                             Padding="8,4"
                             Margin="0,2">
                             <TextBlock FontFamily="Consolas" FontSize="12">
-                                <Run Text="{Binding CurrentPosition.JointPositions[5], StringFormat='{}{0:F4} rad'}"/>
+                                <Run Text="{Binding CurrentPosition[5], StringFormat='{}{0:F4} rad'}"/>
                             </TextBlock>
                         </Border>
                         <TextBlock Grid.Row="5" Grid.Column="2" 
@@ -372,7 +373,7 @@
                                 Margin="10,5,0,5"
                                 VerticalAlignment="Center"
                                 Foreground="#666">
-                            <Run Text="("/><Run Text="{Binding CurrentPosition.JointPositions[5], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
+                            <Run Text="("/><Run Text="{Binding CurrentPosition[5], Converter={StaticResource RadiansToDegreeConverter}, StringFormat='{}{0:F2}'}"/><Run Text="°)"/>
                         </TextBlock>
                     </Grid>
                 </GroupBox>
@@ -543,6 +544,235 @@
                     </Grid>
                 </GroupBox>
             </Grid>
+
+            <!-- Separator -->
+            <Separator Margin="0,20,0,20"/>
+
+            <!-- UART Motors Section -->
+            <TextBlock Text="Individual Control" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Margin="0,0,0,20"/>
+
+            <!-- UART Connection Section -->
+            <GroupBox Header="UART Connection" Margin="0,0,0,15">
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                    <TextBlock Text="Serial Port:" 
+                              FontWeight="Bold" 
+                              FontSize="14"
+                              VerticalAlignment="Center"
+                              Margin="0,0,10,0"/>
+                    <ComboBox ItemsSource="{Binding AvailableSerialPorts}"
+                              SelectedItem="{Binding SelectedSerialPort}"
+                              Width="120"
+                              FontFamily="Consolas"
+                              FontSize="14"
+                              VerticalAlignment="Center"
+                              Margin="0,0,10,0"/>
+                    <Button Content="Refresh Ports" 
+                            Click="RefreshPortsButton_Click"
+                            Width="120" 
+                            Height="30"
+                            FontSize="14"
+                            Margin="0,0,10,0"/>
+                    <TextBlock Text="{Binding AvailableSerialPorts.Count, StringFormat='({0} ports found)'}" 
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               Foreground="#666"/>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Servo Motor Control -->
+            <GroupBox Header="Servo Motor" Margin="0,0,0,15">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                        <TextBlock Text="Degrees (0-180):" 
+                                  FontWeight="Bold"
+                                  FontSize="14"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,10,0"
+                                  Width="120"/>
+                        <TextBox Text="{Binding ServoDegrees, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="100"
+                                 FontFamily="Consolas"
+                                 FontSize="14"
+                                 Padding="5,2"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,10,0"/>
+                        <Button Content="Move Servo"
+                                Click="MoveServoButton_Click"
+                                Width="120" 
+                                Height="35"
+                                FontSize="14"
+                                Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding ServoStatus}" 
+                                   VerticalAlignment="Center"
+                                   FontSize="14"
+                                   Foreground="#666"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Stepper Motor Control -->
+            <GroupBox Header="Stepper Motor" Margin="0,0,0,15">
+                <StackPanel>
+                    <Grid Margin="0,10,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Motor Selection -->
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                  Text="Motor:" 
+                                  FontWeight="Bold"
+                                  FontSize="14"
+                                  VerticalAlignment="Center"
+                                  Margin="0,5"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,5">
+                            <RadioButton Content="Rail (1)" 
+                                        IsChecked="{Binding StepperMotorSelection, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}"
+                                        GroupName="StepperMotor"
+                                        Margin="0,0,20,0"
+                                        VerticalAlignment="Center"/>
+                            <RadioButton Content="Pump (2)" 
+                                        IsChecked="{Binding StepperMotorSelection, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}"
+                                        GroupName="StepperMotor"
+                                        Margin="0,0,20,0"
+                                        VerticalAlignment="Center"/>
+                            <RadioButton Content="Tool (3)" 
+                                        IsChecked="{Binding StepperMotorSelection, Converter={StaticResource IntToBoolConverter}, ConverterParameter=3}"
+                                        GroupName="StepperMotor"
+                                        VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Direction -->
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                  Text="Direction:" 
+                                  FontWeight="Bold"
+                                  FontSize="14"
+                                  VerticalAlignment="Center"
+                                  Margin="0,5"/>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,5">
+                            <RadioButton Content="Anti-Clockwise" 
+                                        IsChecked="{Binding StepperDirection, Converter={StaticResource IntToBoolConverter}, ConverterParameter=0}"
+                                        GroupName="StepperDirection"
+                                        Margin="0,0,20,0"
+                                        VerticalAlignment="Center"/>
+                            <RadioButton Content="Clockwise" 
+                                        IsChecked="{Binding StepperDirection, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}"
+                                        GroupName="StepperDirection"
+                                        VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Steps -->
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                  Text="Steps (0-30000):" 
+                                  FontWeight="Bold"
+                                  FontSize="14"
+                                  VerticalAlignment="Center"
+                                  Margin="0,5"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                Text="{Binding StepperSteps, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="150"
+                                 HorizontalAlignment="Left"
+                                 FontFamily="Consolas"
+                                 FontSize="14"
+                                 Padding="5,2"
+                                 Margin="0,5"/>
+
+                        <!-- Control Buttons -->
+                        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                                   Orientation="Horizontal" 
+                                   Margin="0,10,0,5">
+                            <Button Content="Move Stepper"
+                                    Click="MoveStepperButton_Click"
+                                    Width="120" 
+                                    Height="35"
+                                    FontSize="14"
+                                    Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding StepperStatus}" 
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="#666"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Solenoid Actuator Control -->
+            <GroupBox Header="Solenoid Actuator" Margin="0,0,0,15">
+                <StackPanel>
+                    <Grid Margin="0,10,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Actuator Number -->
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                  Text="Actuator:" 
+                                  FontWeight="Bold"
+                                  FontSize="14"
+                                  VerticalAlignment="Center"
+                                  Margin="0,5"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                Text="{Binding SolenoidActuatorNumber, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="100"
+                                 HorizontalAlignment="Left"
+                                 FontFamily="Consolas"
+                                 FontSize="14"
+                                 Padding="5,2"
+                                 Margin="0,5"/>
+
+                        <!-- Movement -->
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                  Text="Movement:" 
+                                  FontWeight="Bold"
+                                  FontSize="14"
+                                  VerticalAlignment="Center"
+                                  Margin="0,5"/>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,5">
+                            <RadioButton Content="Extend" 
+                                        IsChecked="{Binding SolenoidMovement, Converter={StaticResource IntToBoolConverter}, ConverterParameter=0}"
+                                        GroupName="SolenoidMovement"
+                                        Margin="0,0,20,0"
+                                        VerticalAlignment="Center"/>
+                            <RadioButton Content="Retract" 
+                                        IsChecked="{Binding SolenoidMovement, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}"
+                                        GroupName="SolenoidMovement"
+                                        VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Control Buttons -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                                   Orientation="Horizontal" 
+                                   Margin="0,10,0,5">
+                            <Button Content="Move Actuator"
+                                    Click="MoveSolenoidButton_Click"
+                                    Width="120" 
+                                    Height="35"
+                                    FontSize="14"
+                                    Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding SolenoidStatus}" 
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="#666"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
 
             <!-- Separator -->
             <Separator Margin="0,20,0,20"/>

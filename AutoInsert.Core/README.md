@@ -1,6 +1,6 @@
 # AutoInsert.Core
 
-This project is responsible for the business logic for the AutoInsert solution.
+This project is responsible for the business logic.
 
 ---
 
