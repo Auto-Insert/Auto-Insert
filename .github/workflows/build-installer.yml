@@ -3,6 +3,11 @@ name: Build Installer
 on:
   workflow_dispatch:  # Manual trigger only
     inputs:
+      version:
+        description: 'Version'
+        required: true
+        default: '1.0.0'
+        type: string
       configuration:
         description: 'Build configuration'
         required: true
@@ -54,6 +59,11 @@ jobs:
       run: |
         choco install innosetup -y
 
+    # Update version in installer script
+    - name: Update installer version
+      run: |
+        (Get-Content installer.iss) -replace '#define MyAppVersion ".*"', '#define MyAppVersion "${{ inputs.version }}"' | Set-Content installer.iss
+
     # Build installer with Inno Setup
     - name: Build Installer
       run: |
@@ -63,6 +73,6 @@ jobs:
     - name: Upload installer artifact
       uses: actions/upload-artifact@v4
       with:
-        name: AutoInsert-Setup-${{ inputs.configuration }}
+        name: AutoInsert-Setup-${{ inputs.version }}-${{ inputs.configuration }}
         path: installer-output/AutoInsert-Setup-*.exe
         retention-days: 30
