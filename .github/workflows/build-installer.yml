@@ -1,0 +1,63 @@
+name: Build Installer
+
+on:
+  workflow_dispatch:  # Manual trigger only
+    inputs:
+      configuration:
+        description: 'Build configuration'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Debug
+          - Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: AutoInsert.sln
+      UI_Project_Path: AutoInsert.UI/AutoInsert.UI.csproj
+      Test_Project_Path: AutoInsert.Core.Tests/AutoInsert.Core.Tests.csproj
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # Install .NET 9.0
+    - name: Install .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    # Restore dependencies
+    - name: Restore dependencies
+      run: dotnet restore $env:Solution_Name
+
+    # Build the solution
+    - name: Build solution
+      run: dotnet build $env:Solution_Name --configuration ${{ inputs.configuration }} --no-restore
+
+    # Run unit tests
+    - name: Run tests
+      run: dotnet test $env:Test_Project_Path --configuration ${{ inputs.configuration }} --no-build --verbosity normal
+
+    # Publish the WPF application
+    - name: Publish WPF Application
+      run: dotnet publish $env:UI_Project_Path --configuration ${{ inputs.configuration }} --output ./publish --self-contained true --runtime win-x64
+
+    # Create a zip archive
+    - name: Create installer archive
+      run: |
+        Compress-Archive -Path ./publish/* -DestinationPath ./AutoInsert-Installer-${{ inputs.configuration }}.zip
+
+    # Upload the installer as an artifact
+    - name: Upload installer artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AutoInsert-Installer-${{ inputs.configuration }}
+        path: ./AutoInsert-Installer-${{ inputs.configuration }}.zip
+        retention-days: 30
