@@ -28,12 +28,16 @@ namespace AutoInsert.Core.Services.Communication
         public async Task<MoveStatus> MoveAsync(Motor motor, Direction direction, int steps)
         {
             if (steps < 0 || steps > 30000)
-                throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be between 0 and 30000.");
+                return new MoveStatus(false, "Steps must be between 0 and 30000.");
             
             string command = BuildCommand(motor, direction, steps);
             try
             {
                 bool response = await _uartService.SendCommandAsync(command);
+                if (!response)
+                {
+                    return new MoveStatus(false, "Failed to move stepper motor.");
+                }
                 return new MoveStatus(response, $"Stepper motor move {steps} step(s) command sent.");
             }
             catch (Exception ex)

@@ -12,6 +12,7 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
     private readonly string _ipAddress = ipAddress;
     private readonly int _port = port;
     private readonly URPackageParser _parser = new();
+    private readonly SemaphoreSlim _socketLock = new(1, 1); // Ensure only one operation at a time
     public bool IsConnected => _socket?.Connected ?? false;
 
     public async Task<bool> ConnectAsync()
@@ -36,114 +37,137 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
 
     public async Task<(double[]? jointPositions, CartesianPositions? cartesianPositions)> GetRobotStateAsync()
     {
-        // Flush old buffered data first to get latest position
-        await FlushSocketBufferAsync();
+        // Wait for exclusive access to the socket to prevent concurrent reads
+        await _socketLock.WaitAsync();
         
-        double[]? jointPositions = null;
-        CartesianPositions? cartesianPositions = null;
-        
-        int packagesReceived = 0;
-        
-        // Attempt multiple times to get valid data for both
-        for (int attempt = 0; attempt < 15; attempt++)
+        try
         {
-            var packageData = await ReceivePackageAsync();
+            await FlushSocketBufferAsync();
             
-            if (packageData == null)
+            double[]? jointPositions = null;
+            CartesianPositions? cartesianPositions = null;
+            
+            // Attempt multiple times to get valid data for both
+            for (int attempt = 0; attempt < 15; attempt++)
             {
+                var packageData = await ReceivePackageAsync();
+                
+                if (packageData == null)
+                {
+                    await Task.Delay(100);
+                    continue;
+                }
+
+                // Try to parse both from the same package
+                if (jointPositions == null)
+                    jointPositions = _parser.ParseJointPositions(packageData);
+                
+                if (cartesianPositions == null)
+                    cartesianPositions = _parser.ParseCartesianPositions(packageData);
+                
+                // If we have both, return
+                if (jointPositions != null && cartesianPositions != null)
+                    return (jointPositions, cartesianPositions);
+                
                 await Task.Delay(100);
-                continue;
-            }
-
-            packagesReceived++;
-
-            // Try to parse both from the same package
-            if (jointPositions == null)
-            {
-                jointPositions = _parser.ParseJointPositions(packageData);
             }
             
-            if (cartesianPositions == null)
-            {
-                cartesianPositions = _parser.ParseCartesianPositions(packageData);
-            }
-            
-            // If we have both, return
-            if (jointPositions != null && cartesianPositions != null)
-            {
-                return (jointPositions, cartesianPositions);
-            }
-            
-            await Task.Delay(100);
+            return (jointPositions, cartesianPositions);
         }
-        
-        return (jointPositions, cartesianPositions);
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
     public async Task<double[]?> GetJointPositionsAsync()
     {
-        // Flush old buffered data first to get latest position
-        await FlushSocketBufferAsync();
-        
-        // Attempt multiple times to get valid data
-        for (int attempt = 0; attempt < 10; attempt++)
+        await _socketLock.WaitAsync();
+        try
         {
-            var packageData = await ReceivePackageAsync();
+            // Flush old buffered data first to get latest position
+            await FlushSocketBufferAsync();
             
-            if (packageData == null)
-                continue;
-
-            var jointPositions = _parser.ParseJointPositions(packageData);
-            if (jointPositions != null)
+            // Attempt multiple times to get valid data
+            for (int attempt = 0; attempt < 10; attempt++)
             {
-                return jointPositions;
+                var packageData = await ReceivePackageAsync();
+                
+                if (packageData == null)
+                    continue;
+
+                var jointPositions = _parser.ParseJointPositions(packageData);
+                if (jointPositions != null)
+                {
+                    return jointPositions;
+                }
+                await Task.Delay(150);
             }
-            await Task.Delay(150);
+            return null;
         }
-        return null;
+        finally
+        {
+            _socketLock.Release();
+        }
     } 
     public async Task<CartesianPositions?> GetCartesianPositionsAsync()
     {
-        // Flush old buffered data first to get latest position
-        await FlushSocketBufferAsync();
-        
-        // Attempt multiple times to get valid data
-        for (int attempt = 0; attempt < 10; attempt++)
+        await _socketLock.WaitAsync();
+        try
         {
-            var packageData = await ReceivePackageAsync();
+            // Flush old buffered data first to get latest position
+            await FlushSocketBufferAsync();
             
-            if (packageData == null)
-                continue;
+            // Attempt multiple times to get valid data
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                var packageData = await ReceivePackageAsync();
+                
+                if (packageData == null)
+                    continue;
 
-            var cartesianPositions = _parser.ParseCartesianPositions(packageData);
-            if (cartesianPositions != null)
-                return cartesianPositions;
+                var cartesianPositions = _parser.ParseCartesianPositions(packageData);
+                if (cartesianPositions != null)
+                    return cartesianPositions;
+                
+                await Task.Delay(50);
+            }
             
-            await Task.Delay(50);
+            return null;
         }
-        
-        return null;
+        finally
+        {
+            _socketLock.Release();
+        }
     }
     public async Task<ToolData?> GetToolDataAsync()
     {
-        // Flush old buffered data first
-        await FlushSocketBufferAsync();
-        
-        for (int attempt = 0; attempt < 10; attempt++)
+        await _socketLock.WaitAsync();
+        try
         {
-            var packageData = await ReceivePackageAsync();
+            // Flush old buffered data first
+            await FlushSocketBufferAsync();
             
-            if (packageData == null)
-                continue;
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                var packageData = await ReceivePackageAsync();
+                
+                if (packageData == null)
+                    continue;
 
-            var toolData = _parser.ParseToolData(packageData);
-            if (toolData != null)
-                return toolData;
+                var toolData = _parser.ParseToolData(packageData);
+                if (toolData != null)
+                    return toolData;
+                
+                await Task.Delay(150);
+            }
             
-            await Task.Delay(150);
+            return null;
         }
-        
-        return null;
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
     private async Task FlushSocketBufferAsync()
@@ -153,29 +177,26 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
 
         try
         {
-            // Read and discard complete packages to stay synchronized
-            // Read for a short time to get fresh data
-            var timeout = DateTime.Now.AddMilliseconds(200);
+            int packagesRead = 0;
+            var startTime = DateTime.Now;
+            var maxFlushTime = TimeSpan.FromMilliseconds(50);
             
-            while (DateTime.Now < timeout && _socket.Available > 0)
+            while (DateTime.Now - startTime < maxFlushTime && _socket.Available > 1400)
             {
-                // Read complete packages, not raw bytes, to maintain sync
                 try
                 {
                     byte[] sizeBuffer = new byte[4];
                     int bytesRead = 0;
                     
-                    // Try to read size header
-                    for (int i = 0; i < 4 && DateTime.Now < timeout; i++)
+                    // Read size header with timeout
+                    using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(20));
+                    try
                     {
-                        if (_socket.Available > 0)
-                        {
-                            bytesRead += await _socket.ReceiveAsync(new ArraySegment<byte>(sizeBuffer, bytesRead, 4 - bytesRead), SocketFlags.None);
-                        }
-                        else
-                        {
-                            await Task.Delay(10);
-                        }
+                        bytesRead = await _socket.ReceiveAsync(new ArraySegment<byte>(sizeBuffer, 0, 4), SocketFlags.None, cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
                     }
                     
                     if (bytesRead < 4)
@@ -184,35 +205,43 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
                     int packageSize = _parser.ReadInt32BigEndian(sizeBuffer, 0);
                     
                     if (packageSize < 10 || packageSize > 5000)
-                        break; // Invalid size, stop flushing
+                        break;
                     
                     // Read and discard the rest of the package
                     byte[] discardBuffer = new byte[packageSize - 4];
                     int totalRead = 0;
                     
-                    while (totalRead < discardBuffer.Length && DateTime.Now < timeout)
+                    using var cts2 = new CancellationTokenSource(TimeSpan.FromMilliseconds(20));
+                    try
                     {
-                        if (_socket.Available > 0)
+                        while (totalRead < discardBuffer.Length)
                         {
                             int read = await _socket.ReceiveAsync(
-                                new ArraySegment<byte>(discardBuffer, totalRead, discardBuffer.Length - totalRead), 
-                                SocketFlags.None);
+                                new ArraySegment<byte>(discardBuffer, totalRead, discardBuffer.Length - totalRead),
+                                SocketFlags.None,
+                                cts2.Token);
+                            
+                            if (read == 0)
+                                break;
+                                
                             totalRead += read;
                         }
-                        else
-                        {
-                            await Task.Delay(10);
-                        }
                     }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    
+                    if (totalRead < discardBuffer.Length)
+                        break;
+                    
+                    packagesRead++;
                 }
                 catch
                 {
                     break;
                 }
             }
-            
-            // Wait a bit for fresh data to arrive
-            await Task.Delay(100);
         }
         catch
         {
@@ -257,17 +286,32 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
     private async Task<int> ReceiveExactAsync(byte[] buffer, int offset, int count)
     {
         int totalRead = 0;
+        var timeout = TimeSpan.FromSeconds(2);
         
-        while (totalRead < count)
+        using var cts = new CancellationTokenSource(timeout);
+        
+        try
         {
-            int bytesRead = await _socket!.ReceiveAsync(
-                new ArraySegment<byte>(buffer, offset + totalRead, count - totalRead), 
-                SocketFlags.None);
-            
-            if (bytesRead == 0)
-                break;
+            while (totalRead < count)
+            {
+                int bytesRead = await _socket!.ReceiveAsync(
+                    new ArraySegment<byte>(buffer, offset + totalRead, count - totalRead), 
+                    SocketFlags.None,
+                    cts.Token);
                 
-            totalRead += bytesRead;
+                if (bytesRead == 0)
+                    break;
+                    
+                totalRead += bytesRead;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Timeout occurred
+        }
+        catch
+        {
+            // Other errors
         }
         
         return totalRead;

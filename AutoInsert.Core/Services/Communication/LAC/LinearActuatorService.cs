@@ -48,8 +48,7 @@ public class LinearActuatorService
 
             if (process.ExitCode != 0)
             {
-                Console.WriteLine($"Error: {error}");
-                return new ExecutableStatus(false, error, process.ExitCode);
+                return new ExecutableStatus(false, error.Trim(), process.ExitCode);
             }
             return new ExecutableStatus(true, output, process.ExitCode);
         }

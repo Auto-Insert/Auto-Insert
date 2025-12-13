@@ -17,6 +17,10 @@ namespace AutoInsert.Core.Services.Communication
             try
             {
                 bool response = await _uartService.SendCommandAsync(command);
+                if (!response)
+                {
+                    return new MoveStatus(false, "Failed to move servo motor.");
+                }
                 return new MoveStatus(response, $"Servo motor move {degrees} degree(s) command sent.");
             }
             catch (Exception ex)

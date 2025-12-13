@@ -4,24 +4,18 @@ using System.Runtime.CompilerServices;
 using AutoInsert.Core.Controllers;
 using AutoInsert.Shared.Models;
 using AutoInsert.Core.Services.Communication;
+using AutoInsert.Core.Services.Data;
+using System.Linq;
 
 namespace AutoInsert.UI.ViewModels;
 
 public class DebugViewModel : INotifyPropertyChanged
 {
+    private readonly ConfigurationController _configController;
     private DebugController debugController;
     private CancellationTokenSource? _cancellationTokenSource;
     private CancellationTokenSource? _toolDataCancellationTokenSource;
-    private string _ipAddress = "192.168.0.108";
-    public string IpAddress
-    {
-        get => _ipAddress;
-        set
-        {
-            _ipAddress = value;
-            OnPropertyChanged();
-        }
-    }
+    
     private string? _robotMode = "Not Connected";
     public string? RobotMode
     {
@@ -29,6 +23,39 @@ public class DebugViewModel : INotifyPropertyChanged
         set
         {
             _robotMode = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _configuredIpAddress = "192.168.0.108";
+    public string ConfiguredIpAddress
+    {
+        get => _configuredIpAddress;
+        set
+        {
+            _configuredIpAddress = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _configuredSerialPort = "COM6";
+    public string ConfiguredSerialPort
+    {
+        get => _configuredSerialPort;
+        set
+        {
+            _configuredSerialPort = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private int _configuredBaudRate = 115200;
+    public int ConfiguredBaudRate
+    {
+        get => _configuredBaudRate;
+        set
+        {
+            _configuredBaudRate = value;
             OnPropertyChanged();
         }
     }
@@ -92,6 +119,105 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+    
+    // Local waypoint properties
+    private ObservableCollection<LocalWaypoint> _localWaypoints = new();
+    public ObservableCollection<LocalWaypoint> LocalWaypoints
+    {
+        get => _localWaypoints;
+        set
+        {
+            _localWaypoints = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    private LocalWaypoint? _selectedLocalWaypoint;
+    public LocalWaypoint? SelectedLocalWaypoint
+    {
+        get => _selectedLocalWaypoint;
+        set
+        {
+            _selectedLocalWaypoint = value;
+            OnPropertyChanged();
+            
+            // Update input fields when waypoint is selected
+            if (value != null)
+            {
+                LocalWaypointName = value.Name;
+                LocalX = value.X;
+                LocalY = value.Y;
+                LocalZ = value.Z;
+            }
+        }
+    }
+    
+    private string _localWaypointName = "";
+    public string LocalWaypointName
+    {
+        get => _localWaypointName;
+        set
+        {
+            _localWaypointName = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    private double _localX = 0;
+    public double LocalX
+    {
+        get => _localX;
+        set
+        {
+            _localX = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    private double _localY = 0;
+    public double LocalY
+    {
+        get => _localY;
+        set
+        {
+            _localY = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    private double _localZ = 0;
+    public double LocalZ
+    {
+        get => _localZ;
+        set
+        {
+            _localZ = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    private string _localWaypointStatus = "";
+    public string LocalWaypointStatus
+    {
+        get => _localWaypointStatus;
+        set
+        {
+            _localWaypointStatus = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    private string _calibrationStatusText = "";
+    public string CalibrationStatusText
+    {
+        get => _calibrationStatusText;
+        set
+        {
+            _calibrationStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+    
     private double[]? _selectedWaypoint;
     public double[]? SelectedWaypoint
     {
@@ -131,26 +257,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    private ObservableCollection<string> _availableSerialPorts = new();
-    public ObservableCollection<string> AvailableSerialPorts
-    {
-        get => _availableSerialPorts;
-        set
-        {
-            _availableSerialPorts = value;
-            OnPropertyChanged();
-        }
-    }
-    private string _selectedSerialPort = "COM6";
-    public string SelectedSerialPort
-    {
-        get => _selectedSerialPort;
-        set
-        {
-            _selectedSerialPort = value;
-            OnPropertyChanged();
-        }
-    }
 
     // UART Motor Control Properties
     private int _servoDegrees = 90;
@@ -163,7 +269,6 @@ public class DebugViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
     private string? _servoStatus;
     public string? ServoStatus
     {
@@ -254,7 +359,48 @@ public class DebugViewModel : INotifyPropertyChanged
     
     public DebugViewModel()
     {
-        debugController = new DebugController(IpAddress, _selectedSerialPort);
+        _configController = new ConfigurationController(new StorageService());
+        debugController = new DebugController("192.168.0.108", "COM6");
+        
+        // Initialize with default Zero Point waypoint
+        LocalWaypoints.Add(new LocalWaypoint("Zero Point", 0, 0, 0));
+        
+        _ = LoadConfigurationAsync();
+    }
+    
+    private async Task LoadConfigurationAsync()
+    {
+        try
+        {
+            await _configController.LoadConfigurationAsync();
+            var ipAddress = _configController.GetRobotIpAddress() ?? "192.168.0.108";
+            var serialPort = _configController.GetSerialPort() ?? "COM6";
+            var baudRate = _configController.GetSerialBaudRate();
+            
+            ConfiguredIpAddress = ipAddress;
+            ConfiguredSerialPort = serialPort;
+            ConfiguredBaudRate = baudRate;
+            
+            debugController = new DebugController(ipAddress, serialPort);
+            
+            // Check calibration status
+            if (_configController.HasCalibration())
+            {
+                var calibTime = _configController.GetLastCalibrationTime();
+                CalibrationStatusText = calibTime.HasValue 
+                    ? $"Calibration active (from {calibTime.Value:yyyy-MM-dd HH:mm})"
+                    : "Calibration active";
+            }
+            else
+            {
+                CalibrationStatusText = "⚠ No calibration found. Configure calibration in Settings page to use local coordinates.";
+            }
+        }
+        catch
+        {
+            // Keep default values
+            CalibrationStatusText = "⚠ Error loading calibration status";
+        }
     }
     
     public async Task InitializeAsync()
@@ -285,11 +431,25 @@ public class DebugViewModel : INotifyPropertyChanged
     {
         try
         {
-            // Stop polling
             StopAllPolling();
+            try
+            {
+                debugController.Disconnect();
+                await Task.Delay(500);
+            }
+            catch {}
 
-            // Create new controller with updated IP
-            debugController = new DebugController(_ipAddress, _selectedSerialPort);
+            // Load configuration
+            await _configController.LoadConfigurationAsync();
+            var ipAddress = _configController.GetRobotIpAddress() ?? "192.168.0.108";
+            var serialPort = _configController.GetSerialPort() ?? "COM6";
+            var baudRate = _configController.GetSerialBaudRate();
+            
+            ConfiguredIpAddress = ipAddress;
+            ConfiguredSerialPort = serialPort;
+            ConfiguredBaudRate = baudRate;
+            
+            debugController = new DebugController(ipAddress, serialPort);
 
             // Connect
             ScriptStatus = "Connecting...";
@@ -420,7 +580,130 @@ public class DebugViewModel : INotifyPropertyChanged
             ScriptStatus = $"Error moving to waypoint: {ex.Message}";
         }
     }
+    public void AddLocalWaypoint()
+    {
+        if (string.IsNullOrWhiteSpace(LocalWaypointName))
+        {
+            LocalWaypointStatus = "Please enter a waypoint name";
+            return;
+        }
+        
+        // Check for duplicate names
+        if (LocalWaypoints.Any(w => w.Name.Equals(LocalWaypointName, StringComparison.OrdinalIgnoreCase)))
+        {
+            LocalWaypointStatus = $"Waypoint '{LocalWaypointName}' already exists";
+            return;
+        }
+        
+        var waypoint = new LocalWaypoint(LocalWaypointName, LocalX, LocalY, LocalZ);
+        LocalWaypoints.Add(waypoint);
+        LocalWaypointStatus = $"Added waypoint '{LocalWaypointName}' at X={LocalX:F1}mm, Y={LocalY:F1}mm, Z={LocalZ:F1}mm";
+        
+        // Clear inputs for next waypoint
+        LocalWaypointName = "";
+        LocalX = 0;
+        LocalY = 0;
+        LocalZ = 0;
+    }
+    
+    public void DeleteLocalWaypoint()
+    {
+        if (SelectedLocalWaypoint == null)
+        {
+            LocalWaypointStatus = "Please select a waypoint to delete";
+            return;
+        }
+        
+        // Don't allow deleting Zero Point
+        if (SelectedLocalWaypoint.Name == "Zero Point")
+        {
+            LocalWaypointStatus = "Cannot delete Zero Point";
+            return;
+        }
+        
+        string name = SelectedLocalWaypoint.Name;
+        LocalWaypoints.Remove(SelectedLocalWaypoint);
+        SelectedLocalWaypoint = null;
+        LocalWaypointStatus = $"Deleted waypoint '{name}'";
+        
+        // Clear inputs
+        LocalWaypointName = "";
+        LocalX = 0;
+        LocalY = 0;
+        LocalZ = 0;
+    }
+    
+    public async Task MoveToLocalWaypointAsync()
+    {
+        try
+        {
+            if (SelectedLocalWaypoint == null)
+            {
+                LocalWaypointStatus = "Please select a waypoint to move to";
+                return;
+            }
+            
+            // Check if connected
+            if (debugController == null)
+            {
+                LocalWaypointStatus = "Error: Not connected to robot";
+                return;
+            }
 
+            // Check calibration
+            if (!_configController.HasCalibration())
+            {
+                LocalWaypointStatus = "No calibration found. Configure in Settings.";
+                return;
+            }
+
+            LocalWaypointStatus = $"Moving to '{SelectedLocalWaypoint.Name}'...";
+
+            // Get calibration data
+            var config = _configController.GetConfiguration();
+            var calibrationData = config.CalibrationData;
+            
+            if (calibrationData == null)
+            {
+                LocalWaypointStatus = "Failed to load calibration data";
+                return;
+            }
+
+            // Create CoordinateService with calibration
+            var coordinateService = new AutoInsert.Core.Services.Control.CoordinateService();
+            coordinateService.SetCalibrationData(calibrationData);
+
+            // Convert local coordinates (in mm) to meters for robot
+            double localXMeters = SelectedLocalWaypoint.X / 1000.0;  // Convert mm to meters
+            double localYMeters = SelectedLocalWaypoint.Y / 1000.0;
+            double localZMeters = SelectedLocalWaypoint.Z / 1000.0;
+
+            // Convert to robot coordinates
+            var robotPosition = coordinateService.LocalToGlobal(localXMeters, localYMeters, localZMeters);
+
+            // Move to the position using movel with the orientation from calibration
+            string moveScript = $@"def move_to_local():
+    target_pose = p[{robotPosition.X:F6}, {robotPosition.Y:F6}, {robotPosition.Z:F6}, {robotPosition.Rx:F6}, {robotPosition.Ry:F6}, {robotPosition.Rz:F6}]
+    movel(target_pose, a={MoveAcceleration:F2}, v={MoveSpeed:F2})
+end
+";
+
+            bool success = await debugController.SendURScriptAsync(moveScript);
+            
+            if (success)
+            {
+                LocalWaypointStatus = $"Moving to '{SelectedLocalWaypoint.Name}' (Robot: X={robotPosition.X:F3}m, Y={robotPosition.Y:F3}m, Z={robotPosition.Z:F3}m)";
+            }
+            else
+            {
+                LocalWaypointStatus = "Failed to send move command to robot";
+            }
+        }
+        catch (Exception ex)
+        {
+            LocalWaypointStatus = $"Error: {ex.Message}";
+        }
+    }
     private void StartPositionPolling()
     {
         // Cancel any existing polling
@@ -436,11 +719,14 @@ public class DebugViewModel : INotifyPropertyChanged
                 {
                     var position = await debugController.GetCurrentJointPositionsAsync();
                     
-                    // Update on UI thread
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    // Update on UI thread only if we got valid data
+                    if (position != null && position.Length > 0)
                     {
-                        CurrentPosition = position;
-                    });
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            CurrentPosition = position;
+                        });
+                    }
 
                     await Task.Delay(50, _cancellationTokenSource.Token);
                 }
@@ -473,17 +759,18 @@ public class DebugViewModel : INotifyPropertyChanged
                 {
                     var toolData = await debugController.GetToolDataAsync();
                     
-                    // Update on UI thread
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    if (toolData != null)
                     {
-                        CurrentToolData = toolData;
-                    });
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            CurrentToolData = toolData;
+                        });
+                    }
 
                     await Task.Delay(150, _toolDataCancellationTokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
-                    // Expected when cancellation is requested
                     break;
                 }
                 catch (Exception ex)
@@ -511,6 +798,19 @@ public class DebugViewModel : INotifyPropertyChanged
         StopToolDataPolling();
     }
 
+    public void Disconnect()
+    {
+        StopAllPolling();
+        try
+        {
+            debugController.Disconnect();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error disconnecting: {ex.Message}");
+        }
+    }
+
     // LAC Control
     public async Task SetScrewdriverExtensionAsync()
     {
@@ -532,24 +832,6 @@ public class DebugViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             ExtensionStatus = $"Error: {ex.Message}";
-        }
-    }
-
-    // UART Motors Control
-    public async Task LoadAvailableSerialPortsAsync()
-    {
-        try
-        {
-            var ports = await DebugController.GetAvailableSerialPortsAsync();
-            AvailableSerialPorts.Clear();
-            foreach (var port in ports)
-            {
-                AvailableSerialPorts.Add(port);
-            }
-        }
-        catch (Exception ex)
-        {
-            ScriptStatus = $"Error loading serial ports: {ex.Message}";
         }
     }
 

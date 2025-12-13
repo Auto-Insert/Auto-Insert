@@ -11,6 +11,10 @@
     <Page.Resources>
         <converters:CalibrationStatusConverter x:Key="CalibrationStatusConverter"/>
         <converters:CalibrationSymbolConverter x:Key="CalibrationSymbolConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
+        <converters:InverseBooleanConverter x:Key="InverseBool"/>
+        <converters:MultiBooleanAndConverter x:Key="MultiBoolAnd"/>
     </Page.Resources>
     
     <Grid>
@@ -143,6 +147,119 @@
                                Text="{Binding CalibrationTimeText}"
                                FontSize="14"/>
                 </Grid>
+            </ui:Card>
+
+            <!-- Calibration -->
+            <TextBlock Text="Calibration" 
+                       FontSize="20" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,15"/>
+            
+            <!-- Not Connected Message -->
+            <ui:Card Margin="0,0,0,30" Visibility="{Binding IsRobotConnected, Converter={StaticResource InverseBoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="UR Robot Not Connected" 
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+                    <TextBlock Text="To perform calibration, please ensure:" 
+                               FontSize="12"
+                               Margin="0,0,0,5"/>
+                    <TextBlock Text="• Robot is powered on" 
+                               FontSize="12"
+                               Margin="15,2,0,2"/>
+                    <TextBlock Text="• Network configuration is correct (robot IP address configured above)" 
+                               FontSize="12"
+                               Margin="15,2,0,2"/>
+                    <ui:Button Content="Retry Connection"
+                               Click="RetryConnectionButton_Click"
+                               Width="150"
+                               HorizontalAlignment="Left"/>
+                </StackPanel>
+            </ui:Card>
+            
+            <!-- Calibration UI (when connected) -->
+            <ui:Card Margin="0,0,0,30" Visibility="{Binding IsRobotConnected, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="Capture Zero Point" 
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding OriginPointStatus}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <ui:Button Grid.Column="1"
+                                   Content="Capture"
+                                   Click="CaptureOriginButton_Click"
+                                   IsEnabled="{Binding IsCapturing, Converter={StaticResource InverseBool}}"
+                                   Width="140"/>
+                    </Grid>
+                    
+                    <TextBlock Text="Capture X-Axis Point" 
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding XAxisPointStatus}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <ui:Button Grid.Column="1"
+                                   Content="Capture"
+                                   Click="CaptureXAxisButton_Click"
+                                   Width="140">
+                            <ui:Button.IsEnabled>
+                                <MultiBinding Converter="{StaticResource MultiBoolAnd}">
+                                    <Binding Path="IsOriginCaptured"/>
+                                    <Binding Path="IsCapturing" Converter="{StaticResource InverseBool}"/>
+                                </MultiBinding>
+                            </ui:Button.IsEnabled>
+                        </ui:Button>
+                    </Grid>
+                    
+                    <TextBlock Text="Capture Y-Axis Point" 
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding YAxisPointStatus}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <ui:Button Grid.Column="1"
+                                   Content="Capture"
+                                   Click="CaptureYAxisButton_Click"
+                                   Width="140">
+                            <ui:Button.IsEnabled>
+                                <MultiBinding Converter="{StaticResource MultiBoolAnd}">
+                                    <Binding Path="IsXAxisCaptured"/>
+                                    <Binding Path="IsCapturing" Converter="{StaticResource InverseBool}"/>
+                                </MultiBinding>
+                            </ui:Button.IsEnabled>
+                        </ui:Button>
+                    </Grid>
+                    
+                    <ui:Button Content="Calibrate"
+                               Click="PerformCalibrationButton_Click"
+                               Appearance="Primary"
+                               HorizontalAlignment="Right"
+                               Width="180"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
             </ui:Card>
         </StackPanel>
         

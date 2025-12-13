@@ -45,7 +45,6 @@ end
     public async Task<Waypoint?> GetWaypointFromCurrentPositionsAsync(string? name = null)
     {
         var (jointPositions, cartesianPositions) = await _secondaryClient.GetRobotStateAsync();
-            
         Waypoint waypoint = new()
         {
             Name = name,

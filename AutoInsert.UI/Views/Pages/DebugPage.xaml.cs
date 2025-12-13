@@ -12,6 +12,12 @@ public partial class DebugPage : Page
         InitializeComponent();
         _viewModel = new DebugViewModel();
         DataContext = _viewModel;
+        Unloaded += DebugPage_Unloaded;
+    }
+
+    private void DebugPage_Unloaded(object sender, System.Windows.RoutedEventArgs e)
+    {
+        _viewModel.Disconnect();
     }
 
     private async void ReconnectButton_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -49,6 +55,21 @@ public partial class DebugPage : Page
         await _viewModel.MoveToSelectedWaypointAsync();
     }
 
+    private void AddLocalWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        _viewModel.AddLocalWaypoint();
+    }
+
+    private void DeleteLocalWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        _viewModel.DeleteLocalWaypoint();
+    }
+
+    private async void MoveToLocalWaypointButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        await _viewModel.MoveToLocalWaypointAsync();
+    }
+
     private async void SetScrewdriverExtensionButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         await _viewModel.SetScrewdriverExtensionAsync();
@@ -67,10 +88,5 @@ public partial class DebugPage : Page
     private async void MoveSolenoidButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         await _viewModel.MoveSolenoidActuatorAsync();
-    }
-
-    private async void RefreshPortsButton_Click(object sender, System.Windows.RoutedEventArgs e)
-    {
-        await _viewModel.LoadAvailableSerialPortsAsync();
     }
 }

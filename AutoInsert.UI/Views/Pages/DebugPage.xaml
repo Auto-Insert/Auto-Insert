@@ -18,48 +18,80 @@
         <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
     </Page.Resources>
         <StackPanel Margin="20">
-            <!-- UR Robot Section -->
-            <TextBlock Text="UR Robot" 
-                       FontSize="24" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,20"/>
-
             <!-- Connection Section -->
             <TextBlock Text="Connection" 
                 FontSize="18" 
                 FontWeight="Bold" 
                 Margin="0,0,0,20"/>
             <ui:Card Margin="0,0,0,15">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
-                        <TextBlock Text="IP Address: " 
-                                FontWeight="Bold" 
-                                FontSize="14"
-                                VerticalAlignment="Center"
-                                Margin="0,0,10,0"/>
-                        <TextBox Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"
-                                Width="150"
-                                FontFamily="Consolas"
-                                FontSize="14"
-                                Padding="5,2"
-                                VerticalAlignment="Center"
-                                Margin="0,0,10,0"/>
-                        <Button Content="Reconnect" 
-                                Click="ReconnectButton_Click"
-                                Width="100" 
-                                Height="30"
-                                FontSize="14"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                            <TextBlock Text="Robot Mode: " 
+                                    FontWeight="Bold" 
+                                    FontSize="16"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding RobotMode}" 
+                                    FontSize="16"
+                                    VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,5,0,10">
+                            <TextBlock Text="Configuration:" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14"
+                                       Margin="0,0,0,5"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <TextBlock Text="IP Address: " 
+                                           FontSize="12"
+                                           Foreground="Gray"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding ConfiguredIpAddress}" 
+                                           FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <TextBlock Text="Serial Port: " 
+                                           FontSize="12"
+                                           Foreground="Gray"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding ConfiguredSerialPort}" 
+                                           FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <TextBlock Text="Baud Rate: " 
+                                           FontSize="12"
+                                           Foreground="Gray"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding ConfiguredBaudRate}" 
+                                           FontSize="12"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Text="Configure IP address and serial port in Settings page" 
+                                   FontSize="12"
+                                   Foreground="Gray"
+                                   Margin="0,0,0,5"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,5">
-                        <TextBlock Text="Robot Mode: " 
-                                FontWeight="Bold" 
-                                FontSize="16"/>
-                        <TextBlock Text="{Binding RobotMode}" 
-                                FontSize="16"/>
-                    </StackPanel>
-                </StackPanel>
+                    
+                    <Button Grid.Column="1"
+                            Content="Connect" 
+                            Click="ReconnectButton_Click"
+                            Width="100" 
+                            Height="35"
+                            FontSize="14"
+                            VerticalAlignment="Bottom"
+                            Margin="15,0,0,0"/>
+                </Grid>
             </ui:Card>
-
+            <!-- UR Robot Section -->
+            <TextBlock Text="UR Robot" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Margin="0,0,0,20"/>
             <!-- Control Section -->
             <TextBlock Text="Control" 
                 FontSize="18" 
@@ -83,8 +115,8 @@
                 </StackPanel>
             </ui:Card>
 
-            <!-- Waypoint Section -->
-            <TextBlock Text="Waypoint" 
+            <!-- Local Waypoints Section -->
+            <TextBlock Text="Local Waypoints" 
                 FontSize="18" 
                 FontWeight="Bold" 
                 Margin="0,0,0,20"/>
@@ -95,91 +127,211 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="200"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Save Waypoint Row -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,10,0,10">
-                        <Button Content="Save Current Position" 
-                                Click="SaveWaypointButton_Click"
-                                Width="180" 
-                                Height="30"
-                                FontSize="14"/>
-                    </StackPanel>
+                    <!-- Input Section -->
+                    <TextBlock Grid.Row="0"
+                               Text="Add New Waypoint"
+                               FontWeight="SemiBold"
+                               FontSize="14"
+                               Margin="0,0,0,10"/>
 
-                    <!-- Speed and Acceleration Controls -->
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBlock Text="Speed:" 
-                                  FontWeight="Bold" 
-                                  FontSize="14"
-                                  VerticalAlignment="Center"
-                                  Margin="0,0,10,0"/>
-                        <TextBox Text="{Binding MoveSpeed, UpdateSourceTrigger=PropertyChanged}"
-                                 Width="80"
+                    <!-- Name Input -->
+                    <Grid Grid.Row="1" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Name:" 
+                                   FontWeight="Bold" 
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding LocalWaypointName, UpdateSourceTrigger=PropertyChanged}"
                                  FontFamily="Consolas"
                                  FontSize="14"
                                  Padding="5,2"
                                  VerticalAlignment="Center"
-                                 Margin="0,0,20,0"/>
-                        <TextBlock Text="Acceleration:" 
-                                  FontWeight="Bold" 
-                                  FontSize="14"
-                                  VerticalAlignment="Center"
-                                  Margin="0,0,10,0"/>
-                        <TextBox Text="{Binding MoveAcceleration, UpdateSourceTrigger=PropertyChanged}"
-                                 Width="80"
+                                 MaxWidth="400"
+                                 HorizontalAlignment="Left"/>
+                    </Grid>
+
+                    <!-- Coordinates Input -->
+                    <Grid Grid.Row="2" Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- X Coordinate -->
+                        <TextBlock Grid.Column="0"
+                                   Text="X (mm):" 
+                                   FontWeight="Bold" 
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding LocalX, UpdateSourceTrigger=PropertyChanged}"
                                  FontFamily="Consolas"
                                  FontSize="14"
                                  Padding="5,2"
                                  VerticalAlignment="Center"/>
-                    </StackPanel>
 
-                    <!-- Waypoint List Controls -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="Move to Selected" 
-                                Click="MoveToWaypointButton_Click"
-                                Width="150" 
-                                Height="30"
-                                Margin="0,0,10,0"
+                        <!-- Y Coordinate -->
+                        <TextBlock Grid.Column="3"
+                                   Text="Y (mm):" 
+                                   FontWeight="Bold" 
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="4"
+                                 Text="{Binding LocalY, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas"
+                                 FontSize="14"
+                                 Padding="5,2"
+                                 VerticalAlignment="Center"/>
+
+                        <!-- Z Coordinate -->
+                        <TextBlock Grid.Column="6"
+                                   Text="Z (mm):" 
+                                   FontWeight="Bold" 
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="7"
+                                 Text="{Binding LocalZ, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas"
+                                 FontSize="14"
+                                 Padding="5,2"
+                                 VerticalAlignment="Center"/>
+
+                        <!-- Add Button -->
+                        <Button Grid.Column="9"
+                                Content="Add Waypoint" 
+                                Click="AddLocalWaypointButton_Click"
+                                Width="130" 
+                                Height="35"
                                 FontSize="14"/>
-                        <Button Content="Delete Selected" 
-                                Click="DeleteWaypointButton_Click"
-                                Width="150" 
-                                Height="30"
-                                FontSize="14"/>
-                    </StackPanel>
+                    </Grid>
 
                     <!-- Waypoint List -->
-                    <Border Grid.Row="3" 
-                            BorderBrush="Gray" 
-                            BorderThickness="1" 
-                            CornerRadius="3"
-                            Margin="0,0,0,10">
-                        <ListBox ItemsSource="{Binding SavedWaypoints}"
-                                 SelectedItem="{Binding SelectedWaypoint}"
-                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                 HorizontalContentAlignment="Stretch">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="LightGray" 
-                                            BorderThickness="0,0,0,1" 
-                                            Padding="5">
-                                        <StackPanel>
-                                            <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#666">
-                                                <Run Text="Base: "/><Run Text="{Binding SelectedWaypoint[0], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Shoulder: "/><Run Text="{Binding SelectedWaypoint[1], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Elbow: "/><Run Text="{Binding SelectedWaypoint[2], StringFormat='{}{0:F4}'}"/>
+                    <Grid Grid.Row="3" Margin="0,10,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- ListBox with Waypoints -->
+                        <Border Grid.Column="0"
+                                BorderBrush="Gray"
+                                BorderThickness="1"
+                                CornerRadius="4">
+                            <ListBox ItemsSource="{Binding LocalWaypoints}"
+                                     SelectedItem="{Binding SelectedLocalWaypoint}"
+                                     FontFamily="Consolas"
+                                     FontSize="12"
+                                     Padding="5">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="5,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       VerticalAlignment="Center">
+                                                <Run Text="X="/><Run Text="{Binding X, StringFormat='{}{0:F1}'}"/><Run Text="mm  "/><Run Text="Y="/><Run Text="{Binding Y, StringFormat='{}{0:F1}'}"/><Run Text="mm  "/><Run Text="Z="/><Run Text="{Binding Z, StringFormat='{}{0:F1}'}"/><Run Text="mm"/>
                                             </TextBlock>
-                                            <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#666">
-                                                <Run Text="Wrist 1: "/><Run Text="{Binding SelectedWaypoint[3], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Wrist 2: "/><Run Text="{Binding SelectedWaypoint[4], StringFormat='{}{0:F4}'}"/>
-                                                <Run Text="  Wrist 3: "/><Run Text="{Binding SelectedWaypoint[5], StringFormat='{}{0:F4}'}"/>
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+
+                        <!-- Control Buttons -->
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Top"
+                                    Margin="0,5,0,0">
+                            <Button Content="Move To" 
+                                    Click="MoveToLocalWaypointButton_Click"
+                                    Width="100" 
+                                    Height="35"
+                                    Margin="0,0,0,10"
+                                    FontSize="14"/>
+                            <Button Content="Delete" 
+                                    Click="DeleteLocalWaypointButton_Click"
+                                    Width="100" 
+                                    Height="35"
+                                    FontSize="14"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Speed and Acceleration Controls + Status -->
+                    <Grid Grid.Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Speed/Acceleration -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Speed:" 
+                                      FontWeight="Bold" 
+                                      FontSize="14"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,10,0"/>
+                            <TextBox Text="{Binding MoveSpeed, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="80"
+                                     FontFamily="Consolas"
+                                     FontSize="14"
+                                     Padding="5,2"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,20,0"/>
+                            <TextBlock Text="Acceleration:" 
+                                      FontWeight="Bold" 
+                                      FontSize="14"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,10,0"/>
+                            <TextBox Text="{Binding MoveAcceleration, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="80"
+                                     FontFamily="Consolas"
+                                     FontSize="14"
+                                     Padding="5,2"
+                                     VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Status Message -->
+                        <TextBlock Grid.Row="1"
+                                   Text="{Binding LocalWaypointStatus}" 
+                                   FontSize="14"
+                                   Foreground="#666"
+                                   Margin="0,5,0,5"/>
+
+                        <!-- Calibration Status -->
+                        <TextBlock Grid.Row="2"
+                                   Text="{Binding CalibrationStatusText}"
+                                   FontSize="12"
+                                   Foreground="Orange"
+                                   Margin="0,5,0,0"/>
+                    </Grid>
                 </Grid>
             </ui:Card>
 
@@ -570,37 +722,16 @@
                        FontWeight="Bold" 
                        Margin="0,0,0,20"/>
 
-            <!-- UART Connection Section -->
-            <TextBlock Text="Serial Port" 
+            <!-- UART Motors Section -->
+            <TextBlock Text="UART Motors" 
                 FontSize="18" 
                 FontWeight="Bold" 
                 Margin="0,0,0,20"/>
-            <ui:Card Margin="0,0,0,15">
-                <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
-                    <TextBlock Text="Serial Port:" 
-                              FontWeight="Bold" 
-                              FontSize="14"
-                              VerticalAlignment="Center"
-                              Margin="0,0,10,0"/>
-                    <ComboBox ItemsSource="{Binding AvailableSerialPorts}"
-                              SelectedItem="{Binding SelectedSerialPort}"
-                              Width="120"
-                              FontFamily="Consolas"
-                              FontSize="14"
-                              VerticalAlignment="Center"
-                              Margin="0,0,10,0"/>
-                    <Button Content="Refresh Ports" 
-                            Click="RefreshPortsButton_Click"
-                            Width="120" 
-                            Height="30"
-                            FontSize="14"
-                            Margin="0,0,10,0"/>
-                    <TextBlock Text="{Binding AvailableSerialPorts.Count, StringFormat='({0} ports found)'}" 
-                               VerticalAlignment="Center"
-                               FontSize="14"
-                               Foreground="#666"/>
-                </StackPanel>
-            </ui:Card>
+            
+            <TextBlock Text="Configure serial port in Settings page" 
+                       FontSize="12"
+                       Foreground="Gray"
+                       Margin="0,0,0,15"/>
 
             <!-- Servo Motor Control -->
             <TextBlock Text="Servo Motor" 

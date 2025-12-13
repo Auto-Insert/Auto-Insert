@@ -51,6 +51,14 @@ public class DebugController
         
         return dashboardConnected && primaryConnected && secondaryConnected && uartConnected;
     }
+
+    public void Disconnect()
+    {
+        _dashboardClient.Disconnect();
+        _primaryClient.Disconnect();
+        _secondaryClient.Disconnect();
+        _uartService.Disconnect();
+    }
     
     #region UR Robot Control
     public async Task<string> GetRobotModeAsync()
