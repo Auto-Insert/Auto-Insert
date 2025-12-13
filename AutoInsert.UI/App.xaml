@@ -10,6 +10,14 @@
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
+            
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI"/>
+            </Style>
+            
+            <Style TargetType="{x:Type Page}">
+                <Setter Property="FontFamily" Value="Segoe UI"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

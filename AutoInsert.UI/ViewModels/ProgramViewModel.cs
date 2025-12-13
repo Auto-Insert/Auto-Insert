@@ -5,7 +5,7 @@ using AutoInsert.Shared.Models;
 
 namespace AutoInsert.UI.ViewModels;
 
-public class ConfigurationViewModel() : INotifyPropertyChanged
+public class ProgramViewModel() : INotifyPropertyChanged
 {
     public int[] AvailableBlockCounts { get; } = { 1, 2, 3, 4 };
     private string? _errorMessage = null;

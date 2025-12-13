@@ -34,6 +34,52 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
         }
     }
 
+    public async Task<(double[]? jointPositions, CartesianPositions? cartesianPositions)> GetRobotStateAsync()
+    {
+        // Flush old buffered data first to get latest position
+        await FlushSocketBufferAsync();
+        
+        double[]? jointPositions = null;
+        CartesianPositions? cartesianPositions = null;
+        
+        int packagesReceived = 0;
+        
+        // Attempt multiple times to get valid data for both
+        for (int attempt = 0; attempt < 15; attempt++)
+        {
+            var packageData = await ReceivePackageAsync();
+            
+            if (packageData == null)
+            {
+                await Task.Delay(100);
+                continue;
+            }
+
+            packagesReceived++;
+
+            // Try to parse both from the same package
+            if (jointPositions == null)
+            {
+                jointPositions = _parser.ParseJointPositions(packageData);
+            }
+            
+            if (cartesianPositions == null)
+            {
+                cartesianPositions = _parser.ParseCartesianPositions(packageData);
+            }
+            
+            // If we have both, return
+            if (jointPositions != null && cartesianPositions != null)
+            {
+                return (jointPositions, cartesianPositions);
+            }
+            
+            await Task.Delay(100);
+        }
+        
+        return (jointPositions, cartesianPositions);
+    }
+
     public async Task<double[]?> GetJointPositionsAsync()
     {
         // Flush old buffered data first to get latest position
@@ -107,20 +153,70 @@ public class URSecondaryClient(string ipAddress, int port = 30002): IURClient
 
         try
         {
-            // Read and discard all available buffered data
-            int bytesAvailable = _socket.Available;
+            // Read and discard complete packages to stay synchronized
+            // Read for a short time to get fresh data
+            var timeout = DateTime.Now.AddMilliseconds(200);
             
-            if (bytesAvailable > 0)
+            while (DateTime.Now < timeout && _socket.Available > 0)
             {
-                byte[] flushBuffer = new byte[bytesAvailable];
-                await _socket.ReceiveAsync(new ArraySegment<byte>(flushBuffer), SocketFlags.None);
+                // Read complete packages, not raw bytes, to maintain sync
+                try
+                {
+                    byte[] sizeBuffer = new byte[4];
+                    int bytesRead = 0;
+                    
+                    // Try to read size header
+                    for (int i = 0; i < 4 && DateTime.Now < timeout; i++)
+                    {
+                        if (_socket.Available > 0)
+                        {
+                            bytesRead += await _socket.ReceiveAsync(new ArraySegment<byte>(sizeBuffer, bytesRead, 4 - bytesRead), SocketFlags.None);
+                        }
+                        else
+                        {
+                            await Task.Delay(10);
+                        }
+                    }
+                    
+                    if (bytesRead < 4)
+                        break;
+                    
+                    int packageSize = _parser.ReadInt32BigEndian(sizeBuffer, 0);
+                    
+                    if (packageSize < 10 || packageSize > 5000)
+                        break; // Invalid size, stop flushing
+                    
+                    // Read and discard the rest of the package
+                    byte[] discardBuffer = new byte[packageSize - 4];
+                    int totalRead = 0;
+                    
+                    while (totalRead < discardBuffer.Length && DateTime.Now < timeout)
+                    {
+                        if (_socket.Available > 0)
+                        {
+                            int read = await _socket.ReceiveAsync(
+                                new ArraySegment<byte>(discardBuffer, totalRead, discardBuffer.Length - totalRead), 
+                                SocketFlags.None);
+                            totalRead += read;
+                        }
+                        else
+                        {
+                            await Task.Delay(10);
+                        }
+                    }
+                }
+                catch
+                {
+                    break;
+                }
             }
             
             // Wait a bit for fresh data to arrive
-            await Task.Delay(150);
+            await Task.Delay(100);
         }
         catch
         {
+            // Ignore errors during flush
         }
     }
 

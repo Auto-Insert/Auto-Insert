@@ -1,0 +1,38 @@
+using System.Globalization;
+using System.Windows.Data;
+
+namespace AutoInsert.UI.Converters;
+
+public class CalibrationStatusConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool isCalibrated)
+        {
+            return isCalibrated ? "Calibrated" : "Not Calibrated";
+        }
+        return "Unknown";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class CalibrationSymbolConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool isCalibrated)
+        {
+            return isCalibrated ? "✓" : "✗";
+        }
+        return "";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

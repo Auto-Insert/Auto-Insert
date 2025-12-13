@@ -1,0 +1,151 @@
+<Page x:Class="AutoInsert.UI.Pages.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:converters="clr-namespace:AutoInsert.UI.Converters"
+      Title="Settings"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    
+    <Page.Resources>
+        <converters:CalibrationStatusConverter x:Key="CalibrationStatusConverter"/>
+        <converters:CalibrationSymbolConverter x:Key="CalibrationSymbolConverter"/>
+    </Page.Resources>
+    
+    <Grid>
+        <StackPanel Margin="40,20">
+            <TextBlock Text="Settings" 
+                       FontSize="32" 
+                       FontWeight="Bold" 
+                       Margin="0,0,0,30"/>
+
+            <!-- Robot Connection Settings -->
+            <TextBlock Text="Robot Connection" 
+                       FontSize="20" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,15"/>
+            
+            <ui:Card Margin="0,0,0,30">
+                <StackPanel>
+                    <TextBlock Text="UR Robot IP Address" 
+                               FontSize="14" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding RobotIpAddress, UpdateSourceTrigger=PropertyChanged}"
+
+                                 Margin="0,0,10,0"/>
+                        
+                        <ui:Button Grid.Column="1"
+                                   Content="Save"
+                                   Click="SaveRobotIpButton_Click"
+                                   Appearance="Primary"
+                                   Width="100"/>
+                    </Grid>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Serial Port Settings -->
+            <TextBlock Text="Serial Port" 
+                       FontSize="20" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,15"/>
+            
+            <ui:Card Margin="0,0,0,30">
+                <StackPanel>
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Port" 
+                                       FontSize="14" 
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,10"/>
+                            <ComboBox ItemsSource="{Binding AvailableSerialPorts}"
+                                      SelectedItem="{Binding SelectedSerialPort}"
+                                      FontFamily="Consolas"
+                                      FontSize="14"
+                                      Padding="10,8"/>
+                        </StackPanel>
+                        
+                        <ui:Button Grid.Column="1"
+                                   Content="Refresh"
+                                   Click="RefreshPortsButton_Click"
+                                   VerticalAlignment="Bottom"
+                                   Margin="10,0,0,0"
+                                   Width="100"/>
+                    </Grid>
+                    
+                    <TextBlock Text="Baud Rate" 
+                               FontSize="14" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+                    <ComboBox ItemsSource="{Binding AvailableBaudRates}"
+                              SelectedItem="{Binding SerialBaudRate}"
+
+                              Margin="0,0,0,15"/>
+                    
+                    <ui:Button Content="Save Serial Settings"
+                               Click="SaveSerialPortButton_Click"
+                               Appearance="Primary"
+                               HorizontalAlignment="Right"
+                               Width="180"/>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Calibration Status -->
+            <TextBlock Text="Calibration Status" 
+                       FontSize="20" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,15"/>
+            
+            <ui:Card Margin="0,0,0,30">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="Status:" 
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Margin="0,0,15,10"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1"
+                               FontSize="14"
+                               Margin="0,0,0,10">
+                        <Run Text="{Binding IsCalibrated, Mode=OneWay, Converter={StaticResource CalibrationStatusConverter}}"/>
+                        <Run Text=" " />
+                        <Run Text="{Binding IsCalibrated, Mode=OneWay, Converter={StaticResource CalibrationSymbolConverter}}"/>
+                    </TextBlock>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="Last Calibration:" 
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Margin="0,0,15,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1"
+                               Text="{Binding CalibrationTimeText}"
+                               FontSize="14"/>
+                </Grid>
+            </ui:Card>
+        </StackPanel>
+        
+        <ui:SnackbarPresenter x:Name="SnackbarPresenter"/>
+    </Grid>
+</Page>

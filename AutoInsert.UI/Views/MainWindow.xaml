@@ -26,9 +26,13 @@
                           OpenPaneLength="200">
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem
-                    Content="Configuration"
+                    Content="Program"
+                    Icon="{ui:SymbolIcon Document24}"
+                    TargetPageType="{x:Type pages:ProgramPage}" />
+                <ui:NavigationViewItem
+                    Content="Settings"
                     Icon="{ui:SymbolIcon Settings24}"
-                    TargetPageType="{x:Type pages:ConfigurationPage}" />
+                    TargetPageType="{x:Type pages:SettingsPage}" />
             </ui:NavigationView.MenuItems>
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem

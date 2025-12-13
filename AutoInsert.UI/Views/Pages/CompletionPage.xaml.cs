@@ -21,6 +21,6 @@ public partial class CompletionPage : Page
 
     private void RestartProcess(object sender, RoutedEventArgs e)
     {
-        NavigationService?.Navigate(new ConfigurationPage());
+        NavigationService?.Navigate(new ProgramPage());
     }
 }

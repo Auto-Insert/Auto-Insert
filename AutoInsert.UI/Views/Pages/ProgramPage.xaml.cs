@@ -10,14 +10,13 @@ using AutoInsert.UI.Services;
 
 namespace AutoInsert.UI.Pages;
 
-public partial class ConfigurationPage : Page
+public partial class ProgramPage : Page
 {
-    private readonly ConfigurationViewModel _viewModel;
-    private readonly ConfigurationService _configurationService = new();
-    public ConfigurationPage()
+    private readonly ProgramViewModel _viewModel;
+    public ProgramPage()
     {
         InitializeComponent();
-        _viewModel = new ConfigurationViewModel();
+        _viewModel = new ProgramViewModel();
         DataContext = _viewModel;
 
     }
