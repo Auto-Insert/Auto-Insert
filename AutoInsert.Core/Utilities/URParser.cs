@@ -91,7 +91,7 @@ public class URPackageParser
                     return null;
                 }
                 
-                return new CartesianPositions
+                var result = new CartesianPositions
                 {
                     // Actual TCP pose (meters and radians)
                     X = ReadDoubleBigEndian(data, offset),
@@ -109,6 +109,7 @@ public class URPackageParser
                     TCPOffsetRy = ReadDoubleBigEndian(data, offset + 80),
                     TCPOffsetRz = ReadDoubleBigEndian(data, offset + 88)
                 };
+                return result;
             }
 
             offset += dataSize;
@@ -149,7 +150,7 @@ public class URPackageParser
                     return null;
                 }
                 
-                return new ToolData
+                var result = new ToolData
                 {
                     AnalogInputRange0 = data[offset],
                     AnalogInputRange1 = data[offset + 1],
@@ -161,13 +162,14 @@ public class URPackageParser
                     ToolTemperature = ReadFloatBigEndian(data, offset + 27),
                     ToolMode = data[offset + 31]
                 };
+                return result;
             }
 
             offset += dataSize;
         }
         return null;
     }
-    // Helper methods to parse the packages
+
     public int ReadInt32BigEndian(byte[] data, int offset)
     {
         if (BitConverter.IsLittleEndian)
@@ -179,6 +181,7 @@ public class URPackageParser
         }
         return BitConverter.ToInt32(data, offset);
     }
+
     private double ReadDoubleBigEndian(byte[] data, int offset)
     {
         if (BitConverter.IsLittleEndian)
@@ -190,6 +193,7 @@ public class URPackageParser
         }
         return BitConverter.ToDouble(data, offset);
     }
+
     private float ReadFloatBigEndian(byte[] data, int offset)
     {
         if (BitConverter.IsLittleEndian)

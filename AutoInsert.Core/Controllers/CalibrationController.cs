@@ -19,12 +19,15 @@ public class CalibrationController
     }
     public async Task<Waypoint?> GetCurrentPositionAsync(string name)
     {
-        return await _urController.GetWaypointFromCurrentPositionsAsync(name);
+        var waypoint = await _urController.GetWaypointFromCurrentPositionsAsync(name);
+        return waypoint;
     }
     public (bool IsValid, string? ErrorMessage) ValidateCalibrationPoint(Waypoint? waypoint,Waypoint? referencePoint = null,double minDistanceMm = 10.0)
     {
         if (waypoint?.CartesianPositions == null)
+        {
             return (false, "Waypoint has no position data");
+        }
 
         if (referencePoint?.CartesianPositions != null)
         {
@@ -34,7 +37,9 @@ public class CalibrationController
                 Math.Pow(waypoint.CartesianPositions.Z - referencePoint.CartesianPositions.Z, 2)) * 1000;
 
             if (distance < minDistanceMm)
+            {
                 return (false, $"Point is too close to reference ({distance:F1}mm). Minimum distance: {minDistanceMm}mm");
+            }
         }
 
         return (true, null);
@@ -56,20 +61,28 @@ public class CalibrationController
             // Validate all points have data
             var zeroValidation = ValidateCalibrationPoint(zeroPoint);
             if (!zeroValidation.IsValid)
+            {
                 return (false, $"zero point invalid: {zeroValidation.ErrorMessage}");
+            }
 
             var xValidation = ValidateCalibrationPoint(xAxisPoint, zeroPoint);
             if (!xValidation.IsValid)
+            {
                 return (false, $"X-axis point invalid: {xValidation.ErrorMessage}");
+            }
 
             var yValidation = ValidateCalibrationPoint(yAxisPoint, zeroPoint);
             if (!yValidation.IsValid)
+            {
                 return (false, $"Y-axis point invalid: {yValidation.ErrorMessage}");
+            }
 
             // Check that X and Y points are not collinear
             double xyDistance = CalculateDistance(xAxisPoint, yAxisPoint);
             if (xyDistance < 10.0)
+            {
                 return (false, "X-axis and Y-axis points are too close together");
+            }
 
             // Create calibration data
             var calibrationData = new CalibrationData(zeroPoint, xAxisPoint, yAxisPoint);
@@ -84,17 +97,21 @@ public class CalibrationController
             return (false, ex.Message);
         }
     }
+
     public async Task<bool> SaveCalibrationAsync()
     {
         if (_coordinateService.Calibration == null)
+        {
             return false;
+        }
 
         AppConfiguration config = await _storageService.LoadConfigAsync();
         config.CalibrationData = _coordinateService.Calibration;
         config.LastCalibrationTime = DateTime.Now;
         config.IsCalibrated = true;
 
-        return await _storageService.SaveConfigAsync(config);
+        bool success = await _storageService.SaveConfigAsync(config);
+        return success;
     }
     public async Task<(bool Success, string? ErrorMessage)> LoadCalibrationAsync()
     {
@@ -103,7 +120,9 @@ public class CalibrationController
             var config = await _storageService.LoadConfigAsync();
 
             if (config.CalibrationData == null)
+            {
                 return (false, "No saved calibration found");
+            }
 
             _coordinateService.SetCalibrationData(config.CalibrationData);
 
@@ -114,11 +133,13 @@ public class CalibrationController
             return (false, ex.Message);
         }
     }
+
     public async Task<bool> HasSavedCalibrationAsync()
     {
         var config = await _storageService.LoadConfigAsync();
         return config.IsCalibrated && config.CalibrationData != null;
     }
+
     public CalibrationData? GetCalibrationInfo()
     {
         if (_coordinateService.Calibration == null)
