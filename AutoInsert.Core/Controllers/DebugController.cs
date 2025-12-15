@@ -47,9 +47,9 @@ public class DebugController
         bool dashboardConnected = results[0];
         bool primaryConnected = results[1];
         bool secondaryConnected = results[2];
-        bool uartConnected = _uartService.Connect(_serialPort, baudRate: 115200);
+        //bool uartConnected = _uartService.Connect(_serialPort, baudRate: 115200);
         
-        return dashboardConnected && primaryConnected && secondaryConnected && uartConnected;
+        return dashboardConnected && primaryConnected && secondaryConnected; // && uartConnected;
     }
 
     public void Disconnect()
