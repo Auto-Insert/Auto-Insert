@@ -163,7 +163,7 @@ public class DebugViewModel : INotifyPropertyChanged
         }
     }
     
-    private double _localX = 0;
+    private double _localX = 0.0;
     public double LocalX
     {
         get => _localX;
@@ -174,7 +174,7 @@ public class DebugViewModel : INotifyPropertyChanged
         }
     }
     
-    private double _localY = 0;
+    private double _localY = 0.0;
     public double LocalY
     {
         get => _localY;
@@ -185,7 +185,7 @@ public class DebugViewModel : INotifyPropertyChanged
         }
     }
     
-    private double _localZ = 0;
+    private double _localZ = 0.0;
     public double LocalZ
     {
         get => _localZ;
@@ -704,6 +704,73 @@ end
             LocalWaypointStatus = $"Error: {ex.Message}";
         }
     }
+    
+    public async Task MoveToCoordinatesAsync()
+    {
+        try
+        {
+            // Check if connected
+            if (debugController == null)
+            {
+                LocalWaypointStatus = "Error: Not connected to robot";
+                return;
+            }
+
+            // Check calibration
+            if (!_configController.HasCalibration())
+            {
+                LocalWaypointStatus = "No calibration found. Configure in Settings.";
+                return;
+            }
+
+            LocalWaypointStatus = $"Moving to X={LocalX:F1}, Y={LocalY:F1}, Z={LocalZ:F1}...";
+
+            // Get calibration data
+            var config = _configController.GetConfiguration();
+            var calibrationData = config.CalibrationData;
+            
+            if (calibrationData == null)
+            {
+                LocalWaypointStatus = "Failed to load calibration data";
+                return;
+            }
+
+            // Create CoordinateService with calibration
+            var coordinateService = new AutoInsert.Core.Services.Control.CoordinateService();
+            coordinateService.SetCalibrationData(calibrationData);
+
+            // Convert local coordinates (in mm) to meters for robot
+            double localXMeters = LocalX / 1000.0;  // Convert mm to meters
+            double localYMeters = LocalY / 1000.0;
+            double localZMeters = LocalZ / 1000.0;
+
+            // Convert to robot coordinates
+            var robotPosition = coordinateService.LocalToGlobal(localXMeters, localYMeters, localZMeters);
+
+            // Move to the position using movel with the orientation from calibration
+            string moveScript = $@"def move_to_local():
+    target_pose = p[{robotPosition.X:F6}, {robotPosition.Y:F6}, {robotPosition.Z:F6}, {robotPosition.Rx:F6}, {robotPosition.Ry:F6}, {robotPosition.Rz:F6}]
+    movel(target_pose, a={MoveAcceleration:F2}, v={MoveSpeed:F2})
+end
+";
+
+            bool success = await debugController.SendURScriptAsync(moveScript);
+            
+            if (success)
+            {
+                LocalWaypointStatus = $"Moving to X={LocalX:F1}, Y={LocalY:F1}, Z={LocalZ:F1} (Robot: X={robotPosition.X:F3}m, Y={robotPosition.Y:F3}m, Z={robotPosition.Z:F3}m)";
+            }
+            else
+            {
+                LocalWaypointStatus = "Failed to send move command to robot";
+            }
+        }
+        catch (Exception ex)
+        {
+            LocalWaypointStatus = $"Error: {ex.Message}";
+        }
+    }
+    
     private void StartPositionPolling()
     {
         // Cancel any existing polling

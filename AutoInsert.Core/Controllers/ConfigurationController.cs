@@ -1,4 +1,5 @@
 using System.IO.Ports;
+using Autoinsert.Shared.Models;
 using AutoInsert.Core.Services.Data;
 using AutoInsert.Shared.Models;
 
@@ -74,10 +75,9 @@ public class ConfigurationController
         return _currentConfig.LastCalibrationTime;
     }
 
-    public async Task<bool> ResetToDefaultsAsync()
+    public CalibrationData? GetCalibrationData()
     {
-        _currentConfig = new AppConfiguration();
-        return await SaveConfigurationAsync();
+        return _currentConfig.CalibrationData;
     }
 
     public bool ConfigurationExists()

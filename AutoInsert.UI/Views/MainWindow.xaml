@@ -30,6 +30,10 @@
                     Icon="{ui:SymbolIcon Document24}"
                     TargetPageType="{x:Type pages:ProgramPage}" />
                 <ui:NavigationViewItem
+                    Content="Sequence Editor"
+                    Icon="{ui:SymbolIcon Toolbox24}"
+                    TargetPageType="{x:Type pages:SequenceListPage}" />
+                <ui:NavigationViewItem
                     Content="Settings"
                     Icon="{ui:SymbolIcon Settings24}"
                     TargetPageType="{x:Type pages:SettingsPage}" />

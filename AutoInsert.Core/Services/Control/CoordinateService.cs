@@ -18,7 +18,6 @@ public class CoordinateService
         ComputeTransformationMatrix();
         _isCalibrated = true;
     }
-
     private void ComputeTransformationMatrix()
     {
         if (Calibration?.ZeroPoint?.CartesianPositions == null ||
@@ -72,7 +71,7 @@ public class CoordinateService
         zVector[1] /= zLength;
         zVector[2] /= zLength;
 
-        // Recompute Y-axis as cross product of Z and X to ensure orthogonality
+        // Recompute Y-axis
         yVector[0] = zVector[1] * xVector[2] - zVector[2] * xVector[1];
         yVector[1] = zVector[2] * xVector[0] - zVector[0] * xVector[2];
         yVector[2] = zVector[0] * xVector[1] - zVector[1] * xVector[0];
@@ -86,7 +85,6 @@ public class CoordinateService
             { xVector[2], yVector[2], zVector[2] }
         };
     }
-
     public CartesianPositions LocalToGlobal(double localX, double localY, double localZ)
     {
         if (!_isCalibrated || _transformationMatrix == null || _origin == null)
@@ -127,7 +125,6 @@ public class CoordinateService
             TCPOffsetRz = Calibration.ZeroPoint.CartesianPositions.TCPOffsetRz
         };
     }
-
     public (double X, double Y, double Z) GlobalToLocal(CartesianPositions globalPosition)
     {
         if (!_isCalibrated || _transformationMatrix == null || _origin == null)
@@ -155,7 +152,6 @@ public class CoordinateService
 
         return (localX, localY, localZ);
     }
-
     public Waypoint CreateWaypointAtLocal(double localX, double localY, double localZ, string name)
     {
         var globalPosition = LocalToGlobal(localX, localY, localZ);
@@ -164,10 +160,9 @@ public class CoordinateService
         {
             Name = name,
             CartesianPositions = globalPosition,
-            // Joint positions would need to be computed by inverse kinematics
+            // Joint positions calculated by UR
             JointPositions = null
         };
     }
-
     public bool IsCalibrated => _isCalibrated;
 }

@@ -15,6 +15,7 @@
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
         <converters:InverseBooleanConverter x:Key="InverseBool"/>
         <converters:MultiBooleanAndConverter x:Key="MultiBoolAnd"/>
+        <converters:Float6Converter x:Key="Float6Converter"/>
     </Page.Resources>
     
     <Grid>
@@ -190,17 +191,24 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding OriginPointStatus}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding OriginPointStatus}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Visibility="{Binding IsCalibrated, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Stretch">
+                                <TextBlock Text="X:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding OriginPoint.CartesianPositions.X, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" Margin="0,0,8,0" HorizontalAlignment="Stretch" MinWidth="60"/>
+                                <TextBlock Text="Y:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding OriginPoint.CartesianPositions.Y, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" Margin="0,0,8,0" HorizontalAlignment="Stretch" MinWidth="60"/>
+                                <TextBlock Text="Z:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding OriginPoint.CartesianPositions.Z, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" HorizontalAlignment="Stretch" MinWidth="60"/>
+                            </StackPanel>
+                        </StackPanel>
                         <ui:Button Grid.Column="1"
                                    Content="Capture"
                                    Click="CaptureOriginButton_Click"
-                                   IsEnabled="{Binding IsCapturing, Converter={StaticResource InverseBool}}"
                                    Width="140"/>
                     </Grid>
-                    
                     <TextBlock Text="Capture X-Axis Point" 
                                FontSize="14"
                                FontWeight="SemiBold"
@@ -210,21 +218,23 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding XAxisPointStatus}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding XAxisPointStatus}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Visibility="{Binding IsCalibrated, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Stretch">
+                                <TextBlock Text="X:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding XAxisPoint.CartesianPositions.X, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" Margin="0,0,8,0" HorizontalAlignment="Stretch" MinWidth="60"/>
+                                <TextBlock Text="Y:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding XAxisPoint.CartesianPositions.Y, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" Margin="0,0,8,0" HorizontalAlignment="Stretch" MinWidth="60"/>
+                                <TextBlock Text="Z:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding XAxisPoint.CartesianPositions.Z, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" HorizontalAlignment="Stretch" MinWidth="60"/>
+                            </StackPanel>
+                        </StackPanel>
                         <ui:Button Grid.Column="1"
                                    Content="Capture"
                                    Click="CaptureXAxisButton_Click"
-                                   Width="140">
-                            <ui:Button.IsEnabled>
-                                <MultiBinding Converter="{StaticResource MultiBoolAnd}">
-                                    <Binding Path="IsOriginCaptured"/>
-                                    <Binding Path="IsCapturing" Converter="{StaticResource InverseBool}"/>
-                                </MultiBinding>
-                            </ui:Button.IsEnabled>
-                        </ui:Button>
+                                   Width="140"/>
                     </Grid>
                     
                     <TextBlock Text="Capture Y-Axis Point" 
@@ -236,21 +246,23 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding YAxisPointStatus}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding YAxisPointStatus}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Visibility="{Binding IsCalibrated, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Stretch">
+                                <TextBlock Text="X:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding YAxisPoint.CartesianPositions.X, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" Margin="0,0,8,0" HorizontalAlignment="Stretch" MinWidth="60"/>
+                                <TextBlock Text="Y:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding YAxisPoint.CartesianPositions.Y, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" Margin="0,0,8,0" HorizontalAlignment="Stretch" MinWidth="60"/>
+                                <TextBlock Text="Z:" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding YAxisPoint.CartesianPositions.Z, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Float6Converter}}" HorizontalAlignment="Stretch" MinWidth="60"/>
+                            </StackPanel>
+                        </StackPanel>
                         <ui:Button Grid.Column="1"
                                    Content="Capture"
                                    Click="CaptureYAxisButton_Click"
-                                   Width="140">
-                            <ui:Button.IsEnabled>
-                                <MultiBinding Converter="{StaticResource MultiBoolAnd}">
-                                    <Binding Path="IsXAxisCaptured"/>
-                                    <Binding Path="IsCapturing" Converter="{StaticResource InverseBool}"/>
-                                </MultiBinding>
-                            </ui:Button.IsEnabled>
-                        </ui:Button>
+                                   Width="140"/>
                     </Grid>
                     
                     <ui:Button Content="Calibrate"

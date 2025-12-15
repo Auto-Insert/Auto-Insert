@@ -70,6 +70,33 @@ public partial class DebugPage : Page
         await _viewModel.MoveToLocalWaypointAsync();
     }
 
+    private async void MoveToCoordinatesButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        await _viewModel.MoveToCoordinatesAsync();
+    }
+
+    private void NumericTextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+    {
+        // Allow digits, decimal point, and minus sign
+        var textBox = sender as TextBox;
+        if (textBox == null) return;
+        
+        string text = textBox.Text;
+        string newText = text.Insert(textBox.SelectionStart, e.Text);
+        
+        // Check if the resulting text is a valid number
+        e.Handled = !IsValidNumericInput(newText);
+    }
+
+    private bool IsValidNumericInput(string text)
+    {
+        // Allow empty, minus sign, decimal point, or valid number
+        if (string.IsNullOrEmpty(text) || text == "-" || text == "." || text == "-.")
+            return true;
+        
+        return double.TryParse(text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _);
+    }
+
     private async void SetScrewdriverExtensionButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         await _viewModel.SetScrewdriverExtensionAsync();

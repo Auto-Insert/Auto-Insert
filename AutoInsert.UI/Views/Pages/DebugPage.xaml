@@ -183,10 +183,11 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,0"/>
                         <TextBox Grid.Column="1"
-                                 Text="{Binding LocalX, UpdateSourceTrigger=PropertyChanged}"
+                                 Text="{Binding LocalX, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
                                  FontFamily="Consolas"
                                  FontSize="14"
                                  Padding="5,2"
+                                 PreviewTextInput="NumericTextBox_PreviewTextInput"
                                  VerticalAlignment="Center"/>
 
                         <!-- Y Coordinate -->
@@ -197,10 +198,11 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,0"/>
                         <TextBox Grid.Column="4"
-                                 Text="{Binding LocalY, UpdateSourceTrigger=PropertyChanged}"
+                                 Text="{Binding LocalY, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
                                  FontFamily="Consolas"
                                  FontSize="14"
                                  Padding="5,2"
+                                 PreviewTextInput="NumericTextBox_PreviewTextInput"
                                  VerticalAlignment="Center"/>
 
                         <!-- Z Coordinate -->
@@ -211,19 +213,27 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,0"/>
                         <TextBox Grid.Column="7"
-                                 Text="{Binding LocalZ, UpdateSourceTrigger=PropertyChanged}"
+                                 Text="{Binding LocalZ, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
                                  FontFamily="Consolas"
                                  FontSize="14"
                                  Padding="5,2"
+                                 PreviewTextInput="NumericTextBox_PreviewTextInput"
                                  VerticalAlignment="Center"/>
 
-                        <!-- Add Button -->
-                        <Button Grid.Column="9"
-                                Content="Add Waypoint" 
-                                Click="AddLocalWaypointButton_Click"
-                                Width="130" 
-                                Height="35"
-                                FontSize="14"/>
+                        <!-- Add and Move Buttons -->
+                        <StackPanel Grid.Column="9" Orientation="Horizontal">
+                            <Button Content="Move To" 
+                                    Click="MoveToCoordinatesButton_Click"
+                                    Width="100" 
+                                    Height="35"
+                                    Margin="0,0,10,0"
+                                    FontSize="14"/>
+                            <Button Content="Add Waypoint" 
+                                    Click="AddLocalWaypointButton_Click"
+                                    Width="130" 
+                                    Height="35"
+                                    FontSize="14"/>
+                        </StackPanel>
                     </Grid>
 
                     <!-- Waypoint List -->
@@ -256,6 +266,7 @@
                                                        FontWeight="Bold"
                                                        VerticalAlignment="Center"/>
                                             <TextBlock Grid.Column="1"
+                                                       PreviewTextInput="NumericTextBox_PreviewTextInput"
                                                        VerticalAlignment="Center">
                                                 <Run Text="X="/><Run Text="{Binding X, StringFormat='{}{0:F1}'}"/><Run Text="mm  "/><Run Text="Y="/><Run Text="{Binding Y, StringFormat='{}{0:F1}'}"/><Run Text="mm  "/><Run Text="Z="/><Run Text="{Binding Z, StringFormat='{}{0:F1}'}"/><Run Text="mm"/>
                                             </TextBlock>
@@ -298,24 +309,26 @@
                                       FontSize="14"
                                       VerticalAlignment="Center"
                                       Margin="0,0,10,0"/>
-                            <TextBox Text="{Binding MoveSpeed, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding MoveSpeed, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
                                      Width="80"
                                      FontFamily="Consolas"
                                      FontSize="14"
                                      Padding="5,2"
                                      VerticalAlignment="Center"
-                                     Margin="0,0,20,0"/>
+                                     Margin="0,0,20,0"
+                                     PreviewTextInput="NumericTextBox_PreviewTextInput"/>
                             <TextBlock Text="Acceleration:" 
                                       FontWeight="Bold" 
                                       FontSize="14"
                                       VerticalAlignment="Center"
                                       Margin="0,0,10,0"/>
-                            <TextBox Text="{Binding MoveAcceleration, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding MoveAcceleration, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
                                      Width="80"
                                      FontFamily="Consolas"
                                      FontSize="14"
                                      Padding="5,2"
-                                     VerticalAlignment="Center"/>
+                                     VerticalAlignment="Center"
+                                     PreviewTextInput="NumericTextBox_PreviewTextInput"/>
                         </StackPanel>
 
                         <!-- Status Message -->

@@ -15,8 +15,35 @@ public class SettingsViewModel : INotifyPropertyChanged
     private CalibrationController? _calibrationController;
     
     private Waypoint? _originPoint;
+    public Waypoint? OriginPoint
+    {
+        get => _originPoint;
+        set
+        {
+            _originPoint = value;
+            OnPropertyChanged();
+        }
+    }
     private Waypoint? _xAxisPoint;
+    public Waypoint? XAxisPoint
+    {
+        get => _xAxisPoint;
+        set
+        {
+            _xAxisPoint = value;
+            OnPropertyChanged();
+        }
+    }
     private Waypoint? _yAxisPoint;
+    public Waypoint? YAxisPoint
+    {
+        get => _yAxisPoint;
+        set
+        {
+            _yAxisPoint = value;
+            OnPropertyChanged();
+        }
+    }
     
     public SettingsViewModel()
     {
@@ -207,6 +234,15 @@ public class SettingsViewModel : INotifyPropertyChanged
             SerialBaudRate = _configController.GetSerialBaudRate();
             IsCalibrated = _configController.HasCalibration();
             LastCalibrationTime = _configController.GetLastCalibrationTime();
+            var calibration = _configController.GetCalibrationData();
+            OriginPoint = calibration?.ZeroPoint;
+            XAxisPoint = calibration?.XAxisPoint;
+            YAxisPoint = calibration?.YAxisPoint;
+            Console.WriteLine("Configuration loaded in ViewModel");
+            Console.WriteLine(OriginPoint);
+            Console.WriteLine(XAxisPoint);
+            Console.WriteLine(YAxisPoint);
+            Console.WriteLine(calibration);
             StatusMessage = "Configuration loaded";
         }
         catch (Exception ex)
@@ -323,27 +359,6 @@ public class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
-    public async Task ResetToDefaultsAsync()
-    {
-        try
-        {
-            bool success = await _configController.ResetToDefaultsAsync();
-            if (success)
-            {
-                await LoadConfigurationAsync();
-                StatusMessage = "Reset to defaults";
-            }
-            else
-            {
-                StatusMessage = "Failed to reset";
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Error: {ex.Message}";
-        }
-    }
-
     private void InitializeCalibrationController()
     {
         if (_urController == null || _calibrationController != null)
@@ -389,6 +404,7 @@ public class SettingsViewModel : INotifyPropertyChanged
                 return (false, validation.ErrorMessage ?? "Invalid point");
 
             OriginPointStatus = $"Captured: ({_originPoint.CartesianPositions?.X:F3}, {_originPoint.CartesianPositions?.Y:F3}, {_originPoint.CartesianPositions?.Z:F3})";
+            OriginPoint = _originPoint;
             IsOriginCaptured = true;
             return (true, "Origin point captured");
         }
@@ -438,6 +454,7 @@ public class SettingsViewModel : INotifyPropertyChanged
 
             var distance = _originPoint != null ? _calibrationController.CalculateDistance(_originPoint, _xAxisPoint) : 0;
             XAxisPointStatus = $"Captured: Distance from origin = {distance:F1}mm";
+            XAxisPoint = _xAxisPoint;
             IsXAxisCaptured = true;
             return (true, "X-Axis point captured");
         }
@@ -487,6 +504,7 @@ public class SettingsViewModel : INotifyPropertyChanged
 
             var distance = _originPoint != null ? _calibrationController.CalculateDistance(_originPoint, _yAxisPoint) : 0;
             YAxisPointStatus = $"Captured: Distance from origin = {distance:F1}mm";
+            YAxisPoint = _yAxisPoint;
             return (true, "Y-Axis point captured");
         }
         catch (Exception ex)
