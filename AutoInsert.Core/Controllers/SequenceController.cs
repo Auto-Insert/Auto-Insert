@@ -11,9 +11,9 @@ public class SequenceController
     // Events forwarded from the service
     public event EventHandler<SequenceStep>? StepStarted;
     public event EventHandler<SequenceStep>? StepCompleted;
-    public event EventHandler<(SequenceStep step, string errorMessage)>? StepFailed;
+    public event EventHandler<SequenceStep>? StepFailed;
     public event EventHandler<Sequence>? SequenceCompleted;
-    public event EventHandler<(Sequence Sequence, string Error)>? SequenceFailed;
+    public event EventHandler<Sequence>? SequenceFailed;
 
     public SequenceController()
     {
@@ -31,12 +31,6 @@ public class SequenceController
     public async Task InitializeAsync()
     {
         await _sequenceService.InitializeAsync();
-    }
-
-    // Sequence management
-    public void CreateNewSequence(string name, string? description = null)
-    {
-        _sequenceService.CreateNewSequence(name, description);
     }
 
     public void LoadSequence(Sequence sequence)
@@ -126,6 +120,10 @@ public class SequenceController
     }
 
     // Helper methods for frontend
+    public List<string> GetSequenceNames()
+    {
+        return _sequenceService.GetSavedSequenceNames();
+    }
     public List<StepType> GetAvailableStepTypes()
     {
         return Enum.GetValues(typeof(StepType)).Cast<StepType>().ToList();

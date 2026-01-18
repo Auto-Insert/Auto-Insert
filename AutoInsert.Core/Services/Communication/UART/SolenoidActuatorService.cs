@@ -4,8 +4,8 @@ namespace AutoInsert.Core.Services.Communication
 {
     public class SolenoidActuatorService
     {
-        private readonly UartService _uartService;
-        private const int COMMAND_LENGTH = 16;
+        public readonly UartService _uartService;
+        private const int COMMAND_LENGTH = 15;
         private const char ExtendCommand = 'E';
         private const char RetractCommand = 'R';
         public enum ActuatorMovement
@@ -23,7 +23,7 @@ namespace AutoInsert.Core.Services.Communication
             string command = BuildCommand(actuator, movementChar);
             try
             {
-                bool response = await _uartService.SendCommandAsync(command);
+                bool response = _uartService.AddCommandToBuffer(command);
                 if (!response)
                 {
                     return new MoveStatus(false, "Failed to move solenoid actuator.");
@@ -38,8 +38,8 @@ namespace AutoInsert.Core.Services.Communication
         
         private string BuildCommand(int actuator, char movement)
         {
-            // Format: NAaC1p
-            string command = $"NA{actuator}C1{movement}";
+            // Format: NAaC1Dp
+            string command = $"NA{actuator}C1D{movement}";
             
             // Fill rest of the command with X up to COMMAND_LENGTH
             return command.PadRight(COMMAND_LENGTH, 'X');

@@ -1,4 +1,5 @@
 using AutoInsert.Core.Controllers;
+using AutoInsert.Core.Services.Communication;
 using AutoInsert.Core.Services.Control.StepHandlers;
 using AutoInsert.Core.Services.Data;
 using AutoInsert.Shared.Models;
@@ -9,18 +10,25 @@ public class SequenceService()
 {
     private ConfigurationController? _configurationController;
     private URController? _urController;
-    private CalibrationController? _calibrationController;
     private ScrewingStationController? _screwingStationController;
     private CoordinateService? _coordinateService;
     private StorageService? _storageService;
     private AppConfiguration? _appConfiguration;
     private Sequence? _currentSequence;
+    private UartService? _uartService;
+    private StepperMotorService? _stepperMotorService;
+    private ServoMotorService? _servoMotorService;
+    private SolenoidActuatorService? _solenoidActuatorService;
+    private LinearActuatorService? _linearActuatorService;
+    private StepFactory? _stepFactory;
     private CancellationTokenSource? _cancellationTokenSource;
     public event EventHandler<SequenceStep>? StepStarted;
     public event EventHandler<SequenceStep>? StepCompleted;
-    public event EventHandler<(SequenceStep step, string errorMessage)>? StepFailed;
+    public event EventHandler<SequenceStep>? StepFailed;
     public event EventHandler<Sequence>? SequenceCompleted;
-    public event EventHandler<(Sequence Sequence, string Error)>? SequenceFailed;
+    public event EventHandler<Sequence>? SequenceFailed;
+    private bool _connectedToUr = false;
+    private bool _connectedToUart = false;
     public async Task InitializeAsync()
     {
         _storageService = new StorageService();
@@ -32,12 +40,31 @@ public class SequenceService()
         {
             throw new InvalidOperationException("Robot IP address not configured");
         }
-        
+        var serialPort = _appConfiguration.SerialPort;
+        var baudRate = _appConfiguration.SerialBaudRate;
+        if (string.IsNullOrEmpty(serialPort) || baudRate == null)
+        {
+            throw new InvalidOperationException("UART configuration not set");
+        }
+
         // Initialize all controllers and services
-        _urController = new URController(robotIpAddress);
+        //_urController = new URController(robotIpAddress);
         _coordinateService = new CoordinateService();
-        _calibrationController = new CalibrationController(_urController, _coordinateService, _storageService);
         _screwingStationController = new ScrewingStationController();
+        _uartService = new UartService();
+        _stepperMotorService = new StepperMotorService(_uartService);
+        _servoMotorService = new ServoMotorService(_uartService);
+        _solenoidActuatorService = new SolenoidActuatorService(_uartService);
+        _linearActuatorService = new LinearActuatorService();
+
+        _stepFactory = new StepFactory(
+            _urController!,
+            _coordinateService,
+            _uartService,
+            _stepperMotorService,
+            _servoMotorService,
+            _solenoidActuatorService,
+            _linearActuatorService);
         
         // Load calibration data if available
         if (_appConfiguration.CalibrationData != null)
@@ -46,7 +73,17 @@ public class SequenceService()
         }
         
         // Connect to robot
-        await _urController.ConnectAsync();
+        //_connectedToUr = await _urController.ConnectAsync();
+        if (!_connectedToUr)
+        {
+            Console.WriteLine($"WARNING: Failed to connect to UR robot at {robotIpAddress}");
+        }
+        // Initialize UART service
+        _connectedToUart = _uartService.Connect(serialPort, baudRate.Value);
+        if (!_connectedToUart)
+        {
+             Console.WriteLine($"WARNING: Failed to connect to UART serial port. {serialPort} @ {baudRate}");
+        }
     }
     
     // Sequence management methods
@@ -63,18 +100,18 @@ public class SequenceService()
             step.ErrorMessage = null;
         }
     }
-    public async Task<bool> ExecuteSequenceAsync()
+    public async Task<bool> ExecuteSequenceAsync(Sequence? sequence = null)
     {
+        if (_coordinateService == null || _screwingStationController == null)
+        {
+            throw new InvalidOperationException("Service not initialized");
+        }
+        if (sequence != null)
+            _currentSequence = sequence;
         if (_currentSequence == null)
         {
-            throw new InvalidOperationException("No sequence loaded");
+            throw new InvalidOperationException("No sequence loaded to execute");
         }
-
-        if (_urController == null || _coordinateService == null || _screwingStationController == null)
-        {
-            throw new InvalidOperationException("Service not initialized. Call InitializeAsync first.");
-        }
-
         _cancellationTokenSource = new CancellationTokenSource();
 
         try
@@ -86,49 +123,13 @@ public class SequenceService()
                     return false;
                 }
 
-                // Convert data step to executable handler
-                SequenceStep? executableStep = null;
-                
-                if (stepData is MoveURToPositionStep moveStep)
-                {
-                    if (moveStep.TargetPosition == null)
-                    {
-                        stepData.Status = StepStatus.Failed;
-                        stepData.ErrorMessage = "Target position is null";
-                        StepFailed?.Invoke(this, (stepData, stepData.ErrorMessage));
-                        SequenceFailed?.Invoke(this, (_currentSequence, stepData.ErrorMessage));
-                        return false;
-                    }
-                    
-                    executableStep = new MoveURToPosition(
-                        _urController,
-                        _coordinateService,
-                        moveStep.TargetPosition,
-                        moveStep.Speed,
-                        moveStep.Acceleration,
-                        moveStep.GripPart)
-                    {
-                        Name = moveStep.Name,
-                        Description = moveStep.Description
-                    };
-                }
-                else if (stepData is SetScrewdriverExtensionStep screwStep)
-                {
-                    executableStep = new SetScrewdriverExtension(
-                        _screwingStationController,
-                        screwStep.Percentage)
-                    {
-                        Name = screwStep.Name,
-                        Description = screwStep.Description
-                    };
-                }
-                
+                var executableStep = _stepFactory!.CreateHandler(stepData);
                 if (executableStep == null)
                 {
                     stepData.Status = StepStatus.Failed;
-                    stepData.ErrorMessage = $"Unknown step type: {stepData.StepType}";
-                    StepFailed?.Invoke(this, (stepData, stepData.ErrorMessage));
-                    SequenceFailed?.Invoke(this, (_currentSequence, stepData.ErrorMessage));
+                    stepData.ErrorMessage = $"No handler found for step type {stepData.StepType}";
+                    StepFailed?.Invoke(this, stepData);
+                    SequenceFailed?.Invoke(this, _currentSequence);
                     return false;
                 }
 
@@ -148,8 +149,8 @@ public class SequenceService()
                 }
                 else if (stepData.Status == StepStatus.Failed)
                 {
-                    StepFailed?.Invoke(this, (stepData, stepData.ErrorMessage));
-                    SequenceFailed?.Invoke(this, (_currentSequence, stepData.ErrorMessage ?? "Step failed"));
+                    StepFailed?.Invoke(this, stepData);
+                    SequenceFailed?.Invoke(this, _currentSequence);
                     return false;
                 }
             }
@@ -157,26 +158,15 @@ public class SequenceService()
             SequenceCompleted?.Invoke(this, _currentSequence);
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            SequenceFailed?.Invoke(this, (_currentSequence, ex.Message));
+            SequenceFailed?.Invoke(this, _currentSequence);
             return false;
         }
     }
     public void CancelSequence()
     {
         _cancellationTokenSource?.Cancel();
-    }
-
-    // Sequence creation and step adding
-    public void CreateNewSequence(string name, string? description = null)
-    {
-        _currentSequence = new Sequence
-        {
-            Name = name,
-            Description = description,
-            Steps = new List<SequenceStep>()
-        };
     }
 
     // Sequence persistence methods
@@ -236,8 +226,4 @@ public class SequenceService()
     }
 
     public Sequence? GetCurrentSequence() => _currentSequence;
-
-    public URController? GetURController() => _urController;
-    public CoordinateService? GetCoordinateService() => _coordinateService;
-    public ScrewingStationController? GetScrewingStationController() => _screwingStationController;
 }

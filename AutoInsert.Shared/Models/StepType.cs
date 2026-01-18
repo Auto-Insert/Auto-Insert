@@ -4,5 +4,12 @@ public enum StepType
     MoveURToPosition,
     RotatePartToThreadHole,
     SetScrewdriverExtension,
-    WaitSeconds
+    WaitSeconds,
+    ResetRail,
+    ChangeToolBit,
+    ScrewInThePlug,
+    DetachTool,
+    AttachPlug,
+    DispenseGlue,
+    ScrewPlug
 }

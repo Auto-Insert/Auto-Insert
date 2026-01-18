@@ -1,6 +1,7 @@
 using AutoInsert.Core.Services.Control;
 using AutoInsert.Core.Services.Control.StepHandlers;
 using AutoInsert.Shared.Models;
+using AutoInsert.Core.Services.Communication;
 
 namespace AutoInsert.Core;
 
@@ -8,163 +9,89 @@ class Program
 {
     static async Task Main()
     {
-        Console.WriteLine("=== AutoInsert Sequence Service Test ===\n");
-
-        try
+        var uartService = new UartService();
+        bool isConnected = uartService.Connect("COM8", 115200);
+        if (!isConnected)
         {
-            // Initialize the sequence service
-            var sequenceService = new SequenceService();
-            Console.WriteLine("Initializing sequence service...");
-            await sequenceService.InitializeAsync();
-            Console.WriteLine("✓ Service initialized\n");
-
-            // Create a new sequence
-            Console.WriteLine("Creating new sequence...");
-            sequenceService.CreateNewSequence("Test Assembly", "Test sequence with multiple steps");
-            Console.WriteLine("✓ Sequence created\n");
-
-            // Get dependencies
-            var urController = sequenceService.GetURController();
-            var coordinateService = sequenceService.GetCoordinateService();
-            var screwingController = sequenceService.GetScrewingStationController();
-
-            if (urController == null || coordinateService == null || screwingController == null)
-            {
-                Console.WriteLine("✗ Failed to get dependencies");
-                return;
-            }
-
-            // Create test waypoints
-            var waypoint1 = new LocalWaypoint("Home", 0, 0, -100);
-            var waypoint2 = new LocalWaypoint("Target",  452.6, 61.6, 17);
-            var waypoint3 = new LocalWaypoint("Target lift",  452.6, 61.6, -100);
-
-            // Add steps to the sequence
-            Console.WriteLine("Adding steps to sequence:");
-            
-            var step1 = new MoveURToPositionStep
-            {
-                Name = "Move to target",
-                Description = "Move robot to (0, 0, 100)",
-                StepType = StepType.MoveURToPosition,
-                TargetPosition = waypoint1,
-                Speed = 0.1,
-                Acceleration = 0.1,
-                GripPart = false
-            };
-            sequenceService.GetCurrentSequence()?.Steps.Add(step1);
-            Console.WriteLine("  ✓ Step 1: Move to target (100, 0, 0)");
-
-            var step2 = new MoveURToPositionStep
-            {
-                Name = "Move Above Part",
-                Description = "Move robot to part",
-                StepType = StepType.MoveURToPosition,
-                TargetPosition = waypoint3,
-                Speed = 2,
-                Acceleration = 1.5,
-                GripPart = false
-            };
-            sequenceService.GetCurrentSequence()?.Steps.Add(step2);
-            var step3 = new MoveURToPositionStep
-            {
-                Name = "Move to Part",
-                Description = "Move robot to part",
-                StepType = StepType.MoveURToPosition,
-                TargetPosition = waypoint2,
-                Speed = 2,
-                Acceleration = 1.5,
-                GripPart = true
-            };
-            sequenceService.GetCurrentSequence()?.Steps.Add(step3);
-            Console.WriteLine("  ✓ Step 2: Lift off with tool");
-            var step4 = new MoveURToPositionStep
-            {
-                Name = "Grip and lift",
-                Description = "Grip and lift block",
-                StepType = StepType.MoveURToPosition,
-                TargetPosition = waypoint3,
-                Speed = 2,
-                Acceleration = 1.5,
-                GripPart = true
-            };
-            sequenceService.GetCurrentSequence()?.Steps.Add(step4);
-            var step5 = new MoveURToPositionStep
-            {
-                Name = "Go back",
-                Description = "Release the gripped part at home position",
-                StepType = StepType.MoveURToPosition,
-                TargetPosition = waypoint2,
-                Speed = 2,
-                Acceleration = 1.5,
-                GripPart = true
-            };
-            sequenceService.GetCurrentSequence()?.Steps.Add(step5);
-            var step6 = new MoveURToPositionStep
-            {
-                Name = "Release it",
-                Description = "Release the gripped part at home position",
-                StepType = StepType.MoveURToPosition,
-                TargetPosition = waypoint2,
-                Speed = 2,
-                Acceleration = 1.5,
-                GripPart = false
-            };
-            sequenceService.GetCurrentSequence()?.Steps.Add(step6);
-            var step7 = new MoveURToPositionStep
-            {
-                Name = "Go back home",
-                Description = "Release the gripped part at home position",
-                StepType = StepType.MoveURToPosition,
-                TargetPosition = waypoint1,
-                Speed = 2,
-                Acceleration = 1.5,
-                GripPart = false
-            };
-            sequenceService.GetCurrentSequence()?.Steps.Add(step7);
-            Console.WriteLine("  ✓ Step 3: Release the tool\n");
-
-            // Display sequence info
-            var currentSequence = sequenceService.GetCurrentSequence();
-            Console.WriteLine($"Sequence: {currentSequence?.Name}");
-            Console.WriteLine($"Description: {currentSequence?.Description}");
-            Console.WriteLine($"Total steps: {currentSequence?.Steps.Count}\n");
-
-            // Execute the sequence
-            Console.WriteLine("=== Executing Sequence ===\n");
-            
-            sequenceService.StepStarted += (sender, step) =>
-            {
-                Console.WriteLine($"▶ Starting: {step.Name}");
-            };
-            
-            sequenceService.StepCompleted += (sender, step) =>
-            {
-                Console.WriteLine($"✓ Completed: {step.Name}");
-            };
-            
-            sequenceService.StepFailed += (sender, args) =>
-            {
-                Console.WriteLine($"✗ Failed: {args.step.Name} - {args.errorMessage}");
-            };
-
-            bool executed = await sequenceService.ExecuteSequenceAsync();
-            
-            if (executed)
-            {
-                Console.WriteLine("\n✓ Sequence execution completed successfully");
-            }
-            else
-            {
-                Console.WriteLine("\n✗ Sequence execution failed");
-            }
-
-            Console.WriteLine("\n=== Test Complete ===");
+            Console.WriteLine("Failed to connect to UART.");
+            return;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"\n✗ Error: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-        }
+        var servoMotorService = new ServoMotorService(uartService);
+        var stepperMotorService = new StepperMotorService(uartService);
+        var solenoidActuatorService = new SolenoidActuatorService(uartService);
+        var linearActuatorService = new LinearActuatorService();
+        
+        // Reset the rail
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Rail, StepperMotorService.Direction.Clockwise, 4000);
+        await uartService.AddDelayToBufferAsync(4);
+        // Deatach tool
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.Clockwise, 25);
+        await uartService.AddDelayToBufferAsync(1);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.Clockwise, 1000);
+        await uartService.AddDelayToBufferAsync(5);
+        // Move to second bit
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Rail, StepperMotorService.Direction.AntiClockwise, 222);
+        await uartService.AddDelayToBufferAsync(2);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.Clockwise, 400);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 401);
+        await uartService.AddDelayToBufferAsync(5);
+
+        // Move to plug dispenser
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Rail, StepperMotorService.Direction.AntiClockwise, 620);
+        await uartService.AddDelayToBufferAsync(7);
+        await solenoidActuatorService.MoveAsync(1, SolenoidActuatorService.ActuatorMovement.Extend);
+        await solenoidActuatorService.MoveAsync(1, SolenoidActuatorService.ActuatorMovement.Retract);
+        await servoMotorService.MoveAsync(100);
+        await uartService.AddDelayToBufferAsync(3);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 12);
+        await servoMotorService.MoveAsync(180);
+
+        // Move to glue dispenser
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Rail, StepperMotorService.Direction.AntiClockwise,798);
+        await uartService.AddDelayToBufferAsync(5);
+        // Dispense glue
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 50);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 50);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 50);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
+        // Move to UR position
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Rail, StepperMotorService.Direction.AntiClockwise, 4000);
+        await uartService.AddDelayToBufferAsync(1);
+        await stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 400);
+        
+        linearActuatorService.SetPosition(0);
+        Task.Delay(5000).Wait();
+        await uartService.SendCommandBufferAsync();
+        
+        await uartService.WaitForStringAsync(">>>>INTERUPT");
+        linearActuatorService.SetPosition(80);
+        await uartService.WaitForStringAsync(">>>>Stepper 3 moved 25 steps<<<<");
+        linearActuatorService.SetPosition(90);
+        await uartService.WaitForStringAsync(">>>>Stepper 3 moved 1000 steps<<<<");
+        linearActuatorService.SetPosition(0);
+        await uartService.WaitForStringAsync(">>>>Stepper 1 moved 222 steps<<<<");
+        linearActuatorService.SetPosition(100);
+        await uartService.WaitForStringAsync(">>>>Stepper 3 moved 401 steps<<<<");
+        linearActuatorService.SetPosition(0);
+        await uartService.WaitForStringAsync(">>>>Stepper 1 moved 620 steps<<<<");
+        linearActuatorService.SetPosition(60);
+        await uartService.WaitForStringAsync(">>>>ACTUATOR EXTENDED<<<<");
+        Task.Delay(500).Wait();
+        linearActuatorService.SetPosition(40);
+        await uartService.WaitForStringAsync(">>>>Servo 1 moved to 100<<<<");
+        linearActuatorService.SetPosition(60);
+        await uartService.WaitForStringAsync(">>>>Servo 1 moved to 180<<<<");
+        linearActuatorService.SetPosition(0);
+        await uartService.WaitForStringAsync(">>>>Stepper 1 moved 798 steps<<<<");
+        linearActuatorService.SetPosition(20);
+        await uartService.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
+        await uartService.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
+        await uartService.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
+        await uartService.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
+        await uartService.WaitForStringAsync(">>>>INTERUPT");
+        linearActuatorService.SetPosition(100);
     }
 }

@@ -4,8 +4,8 @@ namespace AutoInsert.Core.Services.Communication
 {
     public class ServoMotorService
     {
-        private readonly UartService _uartService;
-        private const int COMMAND_LENGTH = 16;
+        public readonly UartService _uartService;
+        private const int COMMAND_LENGTH = 15;
         
         public ServoMotorService(UartService uartService)
         {
@@ -16,7 +16,7 @@ namespace AutoInsert.Core.Services.Communication
             string command = BuildCommand(degrees);
             try
             {
-                bool response = await _uartService.SendCommandAsync(command);
+                bool response = _uartService.AddCommandToBuffer(command);
                 if (!response)
                 {
                     return new MoveStatus(false, "Failed to move servo motor.");

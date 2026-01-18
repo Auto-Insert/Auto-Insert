@@ -4,8 +4,8 @@ namespace AutoInsert.Core.Services.Communication
 {
     public class StepperMotorService
     {
-        private readonly UartService _uartService;
-        private const int COMMAND_LENGTH = 16;
+        public readonly UartService UartService;
+        private const int COMMAND_LENGTH = 15;
         
         public enum Motor
         {
@@ -22,7 +22,7 @@ namespace AutoInsert.Core.Services.Communication
         
         public StepperMotorService(UartService uartService)
         {
-            _uartService = uartService ?? throw new ArgumentNullException(nameof(uartService));
+            UartService = uartService ?? throw new ArgumentNullException(nameof(uartService));
         }
         
         public async Task<MoveStatus> MoveAsync(Motor motor, Direction direction, int steps)
@@ -33,7 +33,7 @@ namespace AutoInsert.Core.Services.Communication
             string command = BuildCommand(motor, direction, steps);
             try
             {
-                bool response = await _uartService.SendCommandAsync(command);
+                bool response = UartService.AddCommandToBuffer(command);
                 if (!response)
                 {
                     return new MoveStatus(false, "Failed to move stepper motor.");
@@ -44,6 +44,7 @@ namespace AutoInsert.Core.Services.Communication
             {
                 return new MoveStatus(false, $"Error sending command: {ex.Message}");
             }
+            
         }
         
         private string BuildCommand(Motor motor, Direction direction, int steps)

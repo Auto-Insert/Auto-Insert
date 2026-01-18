@@ -1,0 +1,74 @@
+<Page x:Class="AutoInsert.UI.Pages.SequencePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:local="clr-namespace:AutoInsert.UI.Pages"
+      Title="Run Sequence"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    <Grid>
+        <Grid>
+            <Grid x:Name="ConnectingOverlay" Background="#AA000000" Visibility="Collapsed" Panel.ZIndex="10">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar Width="200" Height="20" IsIndeterminate="True" Margin="0,0,0,20"/>
+                    <TextBlock Text="Connecting..." Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,0,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+            <StackPanel Margin="40,20" x:Name="MainContentPanel">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ui:Button Content="Back"
+                        Width="100"
+                        Height="32"
+                        HorizontalAlignment="Left"
+                        Click="BackButton_Click"
+                        Margin="0,0,16,0"/>
+                <TextBlock Text="Run Sequence"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock Text="Loaded Program:"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       Margin="0,20,0,0"/>
+            <TextBlock Text="{Binding LoadedFileName}"
+                       FontSize="16"
+                       Margin="0,0,0,10"/>
+            <TextBlock Text="Select Sequence:"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       Margin="0,20,0,0"/>
+            <ComboBox ItemsSource="{Binding SequenceNames}"
+                      SelectedItem="{Binding SelectedSequenceName, Mode=TwoWay}"
+                      FontSize="16"
+                      Margin="0,0,0,10"/>
+            <TextBlock Text="Steps in Sequence:"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Margin="0,20,0,0"/>
+            <ItemsControl ItemsSource="{Binding SelectedSequenceSteps}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ui:Card Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Text="{Binding Description}" FontSize="14"/>
+                                <TextBlock Text="Type: {Binding StepType}" FontSize="12"/>
+                            </StackPanel>
+                        </ui:Card>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ui:Button Content="Run Sequence"
+                       Appearance="Primary"
+                       Icon="{ui:SymbolIcon Play24}"
+                       Height="40"
+                       FontSize="18"
+                       Margin="0,30,0,0"
+                       IsEnabled="{Binding SelectedSequenceSteps}"
+                       Click="RunSequenceButton_Click"/>
+        </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

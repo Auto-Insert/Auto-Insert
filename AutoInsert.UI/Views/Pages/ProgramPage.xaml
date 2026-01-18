@@ -151,12 +151,9 @@
                                         
                                         <TextBlock Grid.Column="0" 
                                                    FontSize="16"
-                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                                    Text="{Binding Key}"/>
-                                        <ui:Badge Grid.Column="1"
-                                                  Content="{Binding Value}"
-                                                  Appearance="Secondary"
-                                                  Margin="10,0,0,0"/>
+                                        <ui:InfoBadge Grid.Column="1"
+                                                  Value="{Binding Value}"/>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -216,7 +213,6 @@
                 Content="Upload Program"
                 Click="UploadProgram" 
                 Margin="0,0,10,0"/>
-            
             <ui:Button 
                 Appearance="Primary"
                 Icon="{ui:SymbolIcon Play24}"

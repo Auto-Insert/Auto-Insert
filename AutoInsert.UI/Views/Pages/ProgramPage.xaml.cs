@@ -20,14 +20,14 @@ public partial class ProgramPage : Page
         DataContext = _viewModel;
 
     }
+    private readonly SequenceController _sequenceController = new();
 
-    private ProgramConfiguration config = new("", 4);
-    
-    private void StartProgram(object sender, RoutedEventArgs e)
+    private async void StartProgram(object sender, RoutedEventArgs e)
     {
-        NavigationService?.Navigate(new LoadingPage(config));
-        
+        var loadedFileName = _viewModel.LoadedFileName ?? string.Empty;
+        NavigationService.Navigate(new SequencePage(loadedFileName, _viewModel.Program));
     }
+
     private async void UploadProgram(object sender, RoutedEventArgs e)
     {
         var filePicker = new OpenFileDialog

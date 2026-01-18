@@ -48,9 +48,9 @@ public class MoveURToPosition : SequenceStep
             
             // Create URScript to move to position
             string gripValue = GripPart ? "True" : "False";
-            string moveScript = $@"def move_ur_to_position():
-    set_tool_voltage({(GripPart ? GripVoltage : 0)})
-    set_digital_out(8, {gripValue})
+            string moveScript = $@"
+def move_ur_to_position():
+    set_digital_out(0, {gripValue})
     target_pose = p[{robotPosition.X:F6}, {robotPosition.Y:F6}, {robotPosition.Z:F6}, {robotPosition.Rx:F6}, {robotPosition.Ry:F6}, {robotPosition.Rz:F6}]
     movel(target_pose, a={Acceleration:F2}, v={Speed:F2})
 end

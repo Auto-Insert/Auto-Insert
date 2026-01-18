@@ -36,20 +36,19 @@ public class DebugController
 
     public async Task<bool> ConnectAsync()
     {
-        var connectTasks = new[]
-        {
-            _dashboardClient.ConnectAsync(),
-            _primaryClient.ConnectAsync(),
-            _secondaryClient.ConnectAsync()
-        };
+        // var connectTasks = new[]
+        // {
+        //     _dashboardClient.ConnectAsync(),
+        //     _primaryClient.ConnectAsync(),
+        //     _secondaryClient.ConnectAsync()
+        // };
         
-        bool[] results = await Task.WhenAll(connectTasks);
-        bool dashboardConnected = results[0];
-        bool primaryConnected = results[1];
-        bool secondaryConnected = results[2];
+        // bool[] results = await Task.WhenAll(connectTasks);
+        // bool dashboardConnected = results[0];
+        // bool primaryConnected = results[1];
+        // bool secondaryConnected = results[2];
         bool uartConnected = _uartService.Connect(_serialPort, baudRate: 115200);
-        
-        return dashboardConnected && primaryConnected && secondaryConnected && uartConnected;
+        return uartConnected;
     }
 
     public void Disconnect()
@@ -128,15 +127,22 @@ end
     }
     public async Task<MoveStatus> MoveServoMotorAsync(int degrees)
     {
-        return await _servoMotorService.MoveAsync(degrees);
+        MoveStatus status = await _servoMotorService.MoveAsync(degrees);
+        await  _servoMotorService._uartService.SendCommandBufferAsync();
+        Console.WriteLine($"Servo move sent to uart");
+        return status;
     }
     public async Task<MoveStatus> MoveStepperMotorAsync(StepperMotorService.Motor motor,StepperMotorService.Direction direction, int steps)
     {
-        return await _stepperMotorService.MoveAsync(motor, direction, steps);
+        MoveStatus moveStatus = await _stepperMotorService.MoveAsync(motor, direction, steps);
+        await  _stepperMotorService.UartService.SendCommandBufferAsync();
+        return moveStatus;
     }
     public async Task<MoveStatus> MoveSolenoidActuatorAsync(int actuator, SolenoidActuatorService.ActuatorMovement movement)
     {
-        return await _solenoidActuatorService.MoveAsync(actuator, movement);
+        MoveStatus status = await _solenoidActuatorService.MoveAsync(actuator, movement);
+        await  _solenoidActuatorService._uartService.SendCommandBufferAsync();
+        return status;
     }
 
     #endregion
