@@ -13,21 +13,26 @@ public class URPrimaryClient(string ipAddress, int port = 30001) : IURClient
 
     public async Task<bool> ConnectAsync()
     {
-        try
+        for (int attempt = 1; attempt <= 2; attempt++)
         {
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPAddress ip = IPAddress.Parse(_ipAddress);
-            IPEndPoint endPoint = new IPEndPoint(ip, _port);
+            try
+            {
+                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                IPAddress ip = IPAddress.Parse(_ipAddress);
+                IPEndPoint endPoint = new IPEndPoint(ip, _port);
 
-            await _socket.ConnectAsync(endPoint);
-            Console.WriteLine("Connected to UR Primary Server");
-            return true;
+                await _socket.ConnectAsync(endPoint);
+                Console.WriteLine("Connected to UR Primary Server");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Attempt {attempt}: Connection to UR Primary Server failed: {ex.Message}");
+                if (attempt == 2)
+                    return false;
+            }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Connection to UR Primary Server failed: {ex.Message}");
-            return false;
-        }
+        return false;
     }
     public async Task<bool> SendURScriptAsync(string script)
     {

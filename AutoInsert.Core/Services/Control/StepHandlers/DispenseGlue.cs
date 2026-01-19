@@ -30,22 +30,22 @@ public class DispenseGlue : SequenceStep
         await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Rail, StepperMotorService.Direction.AntiClockwise,798);
         await _uartService!.SendCommandBufferAsync();
         await _uartService!.WaitForStringAsync(">>>>Stepper 1 moved 798 steps<<<<");
-        _linearActuatorService!.SetPosition(40);
+        _linearActuatorService!.SetPosition(20);
 
         // Dispense glue
-        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 15);
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
         await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 50);
-        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 15);
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
         await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 50);
-        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 15);
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
         await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 50);
-        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 15);
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Pump, StepperMotorService.Direction.AntiClockwise, 100);
         await _uartService!.SendCommandBufferAsync();
 
-        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 15 steps<<<<");
-        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 15 steps<<<<");
-        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 15 steps<<<<");
-        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 15 steps<<<<");
+        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
+        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
+        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
+        await _uartService!.WaitForStringAsync(">>>>Stepper 2 moved 100 steps<<<<");
 
         CompleteStep(true, "Glue dispensed.");
     }

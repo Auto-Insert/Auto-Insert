@@ -28,6 +28,7 @@ public class ResetRail : SequenceStep
         StartStep();
 
         _linearActuatorService!.SetPosition(0);
+        Task.Delay(5000).Wait();
         await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Rail, Direction, 4000);
         await _uartService!.SendCommandBufferAsync();
 

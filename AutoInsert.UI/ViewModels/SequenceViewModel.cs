@@ -7,6 +7,26 @@ namespace AutoInsert.UI.ViewModels;
 
 public class SequenceViewModel : INotifyPropertyChanged
 {
+    private string? _sequenceName;
+    public string? SequenceName
+    {
+        get => _sequenceName;
+        set { _sequenceName = value; OnPropertyChanged(); }
+    }
+
+    private string? _sequenceDescription;
+    public string? SequenceDescription
+    {
+        get => _sequenceDescription;
+        set { _sequenceDescription = value; OnPropertyChanged(); }
+    }
+
+    private ObservableCollection<SequenceStep>? _sequenceSteps;
+    public ObservableCollection<SequenceStep>? SequenceSteps
+    {
+        get => _sequenceSteps;
+        set { _sequenceSteps = value; OnPropertyChanged(); }
+    }
     private string? _loadedFileName;
     public string? LoadedFileName
     {

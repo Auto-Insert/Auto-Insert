@@ -1,6 +1,5 @@
 using AutoInsert.Core.Controllers;
 using AutoInsert.Core.Services.Communication;
-using AutoInsert.Core.Services.Control.StepHandlers;
 using AutoInsert.Core.Services.Data;
 using AutoInsert.Shared.Models;
 
@@ -48,7 +47,7 @@ public class SequenceService()
         }
 
         // Initialize all controllers and services
-        //_urController = new URController(robotIpAddress);
+        _urController = new URController(robotIpAddress);
         _coordinateService = new CoordinateService();
         _screwingStationController = new ScrewingStationController();
         _uartService = new UartService();
@@ -73,7 +72,7 @@ public class SequenceService()
         }
         
         // Connect to robot
-        //_connectedToUr = await _urController.ConnectAsync();
+        _connectedToUr = await _urController.ConnectAsync();
         if (!_connectedToUr)
         {
             Console.WriteLine($"WARNING: Failed to connect to UR robot at {robotIpAddress}");

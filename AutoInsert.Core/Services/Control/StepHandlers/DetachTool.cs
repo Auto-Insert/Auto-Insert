@@ -9,7 +9,6 @@ public class DetachTool : SequenceStep
     private readonly UartService? _uartService;
     private readonly StepperMotorService? _stepperMotorService;
     private readonly LinearActuatorService? _linearActuatorService;
-    public StepperMotorService.Direction Direction { get; set; }
     public DetachTool()
     {
         StepType = StepType.DetachTool;
@@ -26,13 +25,24 @@ public class DetachTool : SequenceStep
     {
         StartStep();
 
-        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 17);
-        _linearActuatorService!.SetPosition(100);
+        _linearActuatorService!.SetPosition(80);
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 25);
         await _uartService!.SendCommandBufferAsync();
 
-        await _uartService!.WaitForStringAsync(">>>>Stepper 3 moved 17 steps<<<<");
+        await _uartService!.WaitForStringAsync(">>>>INTERUPT, Completed: 0 / 25 steps");
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 25);
+        await _uartService!.SendCommandBufferAsync();
+        await _uartService!.WaitForStringAsync(">>>>Stepper 3 moved 25 steps<<<<");        
+        _linearActuatorService!.SetPosition(90);
+
+
+        await _stepperMotorService.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.Clockwise, 700);
+        await _uartService!.SendCommandBufferAsync();
+        await _uartService!.WaitForStringAsync(">>>>Stepper 3 moved 700 steps<<<<");
         _linearActuatorService!.SetPosition(0);
-        Task.Delay(1000).Wait();
+
+        Task.Delay(3000).Wait();
+        
         CompleteStep(true, "Tool deattached.");
     }
 }

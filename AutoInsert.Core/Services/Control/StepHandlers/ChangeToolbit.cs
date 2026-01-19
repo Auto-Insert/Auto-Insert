@@ -33,11 +33,15 @@ public class ChangeToolBit : SequenceStep
         // Spin while going up to attach the bit.
         _linearActuatorService!.SetPosition(100);
         Task.Delay(2000).Wait();
-        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.Clockwise, 12);
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.Clockwise, 400);
         await _uartService!.SendCommandBufferAsync();
-        await _uartService!.WaitForStringAsync(">>>>Stepper 3 moved 12 steps<<<<");
+        await _uartService!.WaitForStringAsync(">>>>Stepper 3 moved 400 steps<<<<");
+
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 300);
+        await _uartService!.SendCommandBufferAsync();
+        await _uartService!.WaitForStringAsync(">>>>Stepper 3 moved 300 steps<<<<");
         _linearActuatorService!.SetPosition(0);
-        Task.Delay(5000).Wait();
+        Task.Delay(4000).Wait();
 
         CompleteStep(true, "Toolbit changed.");
     }

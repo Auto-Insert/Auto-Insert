@@ -36,19 +36,21 @@ public class DebugController
 
     public async Task<bool> ConnectAsync()
     {
-        // var connectTasks = new[]
-        // {
-        //     _dashboardClient.ConnectAsync(),
-        //     _primaryClient.ConnectAsync(),
-        //     _secondaryClient.ConnectAsync()
-        // };
+        var connectTasks = new[]
+        {
+            _dashboardClient.ConnectAsync(),
+            _primaryClient.ConnectAsync(),
+            _secondaryClient.ConnectAsync()
+        };
         
-        // bool[] results = await Task.WhenAll(connectTasks);
-        // bool dashboardConnected = results[0];
-        // bool primaryConnected = results[1];
-        // bool secondaryConnected = results[2];
+        bool[] results = await Task.WhenAll(connectTasks);
+        bool dashboardConnected = results[0];
+        bool primaryConnected = results[1];
+        bool secondaryConnected = results[2];
+        
+        bool urConnected = dashboardConnected && primaryConnected && secondaryConnected;
         bool uartConnected = _uartService.Connect(_serialPort, baudRate: 115200);
-        return uartConnected;
+        return uartConnected && urConnected;
     }
 
     public void Disconnect()

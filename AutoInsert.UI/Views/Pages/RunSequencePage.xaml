@@ -1,0 +1,63 @@
+<Page x:Class="AutoInsert.UI.Pages.RunSequencePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:conv="clr-namespace:AutoInsert.UI.Converters"
+    Title="Running Sequence"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    <Grid>
+                <Grid.Resources>
+                    <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+                </Grid.Resources>
+        <StackPanel Margin="40,20" x:Name="MainContentPanel">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ui:Button Content="Back"
+                        Width="100"
+                        Height="32"
+                        HorizontalAlignment="Left"
+                        Click="BackButton_Click"
+                        Margin="0,0,16,0"/>
+                <TextBlock Text="Running Sequence"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock Text="{Binding SequenceName}"
+                       FontSize="20"
+                       Margin="0,0,0,0"/>
+            <TextBlock Text="{Binding SequenceDescription}"
+                       FontSize="16"
+                       Margin="0,0,0,10"/>
+            <TextBlock Text="Sequence Steps:"
+                       FontSize="18"
+                       Margin="0,40,0,0"/>
+            <ScrollViewer x:Name="StepsScrollViewer" VerticalScrollBarVisibility="Auto" Height="400">
+                <ItemsControl x:Name="StepsItemsControl" ItemsSource="{Binding StepViewModels}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ui:Card Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="14" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <!-- Spinner for running step -->
+                                    <ui:ProgressRing Grid.Column="2" Width="24" Height="24" Margin="10,0,0,0" IsIndeterminate="True" Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <!-- Checkmark for completed step -->
+                                    <TextBlock Grid.Column="2" Text="✔" FontSize="18" Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource SuccessPrimaryBrush}" Visibility="{Binding IsCompleted, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </Grid>
+                            </ui:Card>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
+    </Grid>
+</Page>

@@ -28,7 +28,7 @@ public class ScrewPlug : SequenceStep
         // Go to screwing position and screw.
         await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Rail, StepperMotorService.Direction.AntiClockwise, 4000);
         await _uartService!.AddDelayToBufferAsync(1);
-        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 400);
+        await _stepperMotorService!.MoveAsync(StepperMotorService.Motor.Tool, StepperMotorService.Direction.AntiClockwise, 1500);
         await _uartService!.SendCommandBufferAsync();
 
         await _uartService!.WaitForStringAsync(">>>>INTERUPT");

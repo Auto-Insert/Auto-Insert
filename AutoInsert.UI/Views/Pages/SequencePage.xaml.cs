@@ -21,7 +21,6 @@ public partial class SequencePage : Page
         };
         DataContext = _viewModel;
         Loaded += SequencePage_Loaded;
-        _viewModel.PropertyChanged += ViewModel_PropertyChanged;
     }
 
     private async void SequencePage_Loaded(object sender, RoutedEventArgs e)
@@ -29,28 +28,15 @@ public partial class SequencePage : Page
         ConnectingOverlay.Visibility = Visibility.Visible;
         MainContentPanel.IsEnabled = false;
         await Task.Delay(50); // Allow spinner to render
-        await _sequenceController.InitializeAsync();
-        var names = _sequenceController.GetSequenceNames();
-        _viewModel.SequenceNames = new ObservableCollection<string>(names);
+        var sequence = await _sequenceController.LoadHardcodedSequence();
+        _viewModel.SequenceName = sequence.Name;
+        _viewModel.SequenceDescription = sequence.Description;
+        _viewModel.SequenceSteps = new ObservableCollection<SequenceStep>(sequence.Steps);
         ConnectingOverlay.Visibility = Visibility.Collapsed;
         MainContentPanel.IsEnabled = true;
     }
 
-    private async void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(_viewModel.SelectedSequenceName))
-        {
-            if (!string.IsNullOrEmpty(_viewModel.SelectedSequenceName))
-            {
-                var sequence = await _sequenceController.LoadSequenceFromStorageAsync(_viewModel.SelectedSequenceName);
-                _viewModel.SelectedSequenceSteps = sequence != null ? new ObservableCollection<SequenceStep>(sequence.Steps) : null;
-            }
-            else
-            {
-                _viewModel.SelectedSequenceSteps = null;
-            }
-        }
-    }
+    // Sequence selection logic removed
 
     private void BackButton_Click(object sender, RoutedEventArgs e)
     {
@@ -62,9 +48,13 @@ public partial class SequencePage : Page
 
     private void RunSequenceButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!string.IsNullOrEmpty(_viewModel.SelectedSequenceName) && _viewModel.SelectedSequenceSteps != null)
+        if (!string.IsNullOrEmpty(_viewModel.SequenceName) && _viewModel.SequenceSteps != null)
         {
-            MessageBox.Show($"Running sequence: {_viewModel.SelectedSequenceName}");
+            var runPage = new RunSequencePage(_viewModel.SequenceName, _viewModel.SequenceDescription ?? string.Empty, _viewModel.SequenceSteps);
+            NavigationService?.Navigate(runPage);
+            // Start the sequence immediately after navigation
+            // Use dispatcher to ensure navigation completes before starting
+            Dispatcher.BeginInvoke(new Action(() => runPage.StartSequence()), System.Windows.Threading.DispatcherPriority.Background);
         }
     }
 }

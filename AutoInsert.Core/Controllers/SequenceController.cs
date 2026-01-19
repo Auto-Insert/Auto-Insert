@@ -1,5 +1,6 @@
 using AutoInsert.Core.Services.Control;
-using AutoInsert.Core.Services.Data;
+using AutoInsert.Core.Services.Control.StepHandlers;
+using AutoInsert.Core.Services.Communication;
 using AutoInsert.Shared.Models;
 
 namespace AutoInsert.Core.Controllers;
@@ -88,11 +89,151 @@ public class SequenceController
     }
 
     // Execution
-    public async Task<bool> ExecuteSequenceAsync()
+    public async Task<bool> ExecuteSequenceAsync(Sequence sequence)
     {
-        return await _sequenceService.ExecuteSequenceAsync();
+        return await _sequenceService.ExecuteSequenceAsync(sequence);
     }
 
+    public async Task<Sequence> LoadHardcodedSequence()
+    {
+        var sequence = new Sequence();
+        sequence.Name = "Demonstration Sequence";
+        sequence.Description = "This demonstration sequence picks up a a part and moves it to the screwing position. Changes the tool bit, picks up the plug, applies Loctite, and simulates screwing it in. ";
+
+        // Add steps to the sequence
+        var resetRail = new ResetRail
+        {
+            Name = "Reset Rail Position",
+            Description = "Move the rail to the start position.",
+            Direction = StepperMotorService.Direction.Clockwise,
+        };
+
+        var detachTool = new DetachTool
+        {
+            Name = "Deattach Tool",
+            Description = "Dettach current tool bit.",
+        };
+        
+        var changeToolBit = new ChangeToolBit
+        {
+            Name = "Change tool bit.",
+            Description = "Move to second tool bit position.",
+        };
+
+        var attachPlug = new AttachPlug
+        {
+            Name = "Attach plug",
+            Description = "Attach the plug to the tool bit.",
+        };
+
+        var dispenseGlue = new DispenseGlue
+        {
+            Name = "Apply Loctite",
+            Description = "Dispense glue on the plug.",
+        };
+
+        var screwPlug = new ScrewPlug
+        {
+            Name = "Screw in the plug",
+            Description = "Simulate screwing the plug in to the part.",
+        };
+
+        var overPartPos = new LocalWaypoint("Over Part Position", 512.6, 141.6, -200.0);
+        var moveUrOverPart = new MoveURToPosition
+        {
+            Name = "Move Robot above part",
+            Description = "Move the UR robot to position above the part.",
+            Speed = 0.1,
+            Acceleration = 1.0,
+            TargetPosition = overPartPos,
+            GripPart = false
+        };
+
+        var partPos = new LocalWaypoint("Part Position", 512.6, 141.6, 15.0);
+        var moveUrToPart = new MoveURToPosition
+        {
+            Name = "Move Robot to part",
+            Description = "Move the UR robot to the part.",
+            Speed = 0.1,
+            Acceleration = 1.0,
+            TargetPosition = partPos,
+            GripPart = false
+        };
+
+        var gripAndLift = new MoveURToPosition
+        {
+            Name = "Lift Part",
+            Description = "Grip the part and lift it.",
+            Speed = 0.1,
+            Acceleration = 1.0,
+            TargetPosition = overPartPos,
+            GripPart = true 
+        };
+
+        var screwingPos = new LocalWaypoint("Screwing Position", 255.2, 30, -250.0);
+        var goToScrewingPosition = new MoveURToPosition
+        {
+            Name = "Move to screwing position",
+            Description = "Move part to screwing position.",
+            Speed = 0.1,
+            Acceleration = 1.0,
+            TargetPosition = screwingPos,
+            GripPart = true 
+        };
+
+
+        var gripAndPutDown = new MoveURToPosition
+        {
+            Name = "Move Part back to holder",
+            Description = "Move part back to the holder while gripping it.",
+            Speed = 0.1,
+            Acceleration = 0.5,
+            TargetPosition = partPos,
+            GripPart = true 
+        };
+
+        var moveBackFromScrewing = new MoveURToPosition
+        {
+            Name = "Return to holder",
+            Description = "Move UR robot back to the holder after screwing.",
+            Speed = 0.1,
+            Acceleration = 1.0,
+            TargetPosition = overPartPos,
+            GripPart = true 
+        };
+
+        var goBackToHolder = new MoveURToPosition
+        {
+            Name = "Move Robot above holder",
+            Description = "Move the UR robot to position above the part.",
+            Speed = 0.1,
+            Acceleration = 1.0,
+            TargetPosition = overPartPos,
+            GripPart = false
+        };
+
+        // Picking up part with UR
+        sequence.Steps.Add(moveUrOverPart);
+        sequence.Steps.Add(moveUrToPart);
+        sequence.Steps.Add(gripAndLift);
+        sequence.Steps.Add(goToScrewingPosition);
+
+        // Sequence
+        sequence.Steps.Add(resetRail);
+        sequence.Steps.Add(detachTool);
+        sequence.Steps.Add(changeToolBit);
+        sequence.Steps.Add(attachPlug);
+        sequence.Steps.Add(dispenseGlue);
+        sequence.Steps.Add(screwPlug);
+
+        // Moving back the part
+        sequence.Steps.Add(resetRail);
+        sequence.Steps.Add(moveBackFromScrewing);
+        sequence.Steps.Add(gripAndPutDown);
+        sequence.Steps.Add(goBackToHolder);
+
+        return sequence;
+    }
     public void CancelSequence()
     {
         _sequenceService.CancelSequence();
